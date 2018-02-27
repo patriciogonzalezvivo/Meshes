@@ -1,17 +1,16 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import os, sys
 import numpy as np
-from math import cos, sin, sqrt, atan2, fabs
-from triangle import triangulate, plot as tplot
+from math import cos, sin, sqrt, atan2
+from triangle import triangulate
 
-from Meshes.vector import axisangle_to_q, qv_mult, perpendicular, normalize
+from Meshes.quaternion import axisangle_to_q, qv_mult
+from Meshes.vector import perpendicular, normalize
 
 TAU = np.pi * 2
 QUAD_TEXTCOORDS = [[0,0],[0,1],[1,1],[1,0]]

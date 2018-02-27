@@ -1,18 +1,14 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import os, sys
 import numpy as np
+from triangle import triangulate
 
-from math import cos, sin, sqrt, atan2, fabs
-from triangle import triangulate, plot as tplot
-
-from Meshes.vector import axisangle_to_q, qv_mult
+from Meshes.quaternion import axisangle_to_q, qv_mult
 from Meshes.tools import boundingBox, remap
 
 def polygon( mesh, positions, z, color = None, flipped = False):

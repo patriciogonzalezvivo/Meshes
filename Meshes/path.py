@@ -1,15 +1,12 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import os, sys
 import numpy as np
-
-from math import cos, sin, sqrt, atan2, fabs
+from math import cos, sin
 
 def rect2D(width, height, centered = False):
     left    = 0
