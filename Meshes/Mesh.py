@@ -102,12 +102,12 @@ class Mesh(object):
         v2 = vt2 = vn2 = self.indices[index*3+1] + 1
         v3 = vt3 = vn3 = self.indices[index*3+2] + 1
 
-        if self.indices_texcoords > 0:
+        if len(self.indices_texcoords) > 0:
             vt1 = self.indices_texcoords[index*3] + 1
             vt2 = self.indices_texcoords[index*3+1] + 1
             vt3 = self.indices_texcoords[index*3+2] + 1
 
-        if self.indices_normals > 0:
+        if len(self.indices_normals) > 0:
             vn1 = self.indices_normals[index*3] + 1
             vn2 = self.indices_normals[index*3+1] + 1
             vn3 = self.indices_normals[index*3+2] + 1
