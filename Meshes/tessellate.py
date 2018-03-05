@@ -11,7 +11,7 @@ from triangle import triangulate
 from Meshes.quaternion import axisangle_to_q, qv_mult
 from Meshes.tools import boundingBox, remap
 
-def polygon( mesh, positions, z, color = None, flipped = False):
+def tessPolygon( mesh, positions, z, color = None, flipped = False):
     offset = len(mesh.vertices)
 
     n = [0., 0., 1.]

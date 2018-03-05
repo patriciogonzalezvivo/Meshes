@@ -11,21 +11,24 @@ from triangle import triangulate
 
 from Meshes.quaternion import axisangle_to_q, qv_mult
 from Meshes.vector import perpendicular, normalize
+from Meshes.tessellate import tessPolygon
+from Meshes.path import circle2D
+from Meshes.Mesh import Mesh
 
 TAU = np.pi * 2
 QUAD_TEXTCOORDS = [[0,0],[0,1],[1,1],[1,0]]
 
-def toSphere (coord, radius):
+def toSphere (coord, sphere_radius):
     lngQuat = axisangle_to_q((1, 0, 0), np.radians(coord[0]))
     latQuat = axisangle_to_q((0, 1, 0), np.radians(coord[1]))
     level = axisangle_to_q((0, 0, 1), np.radians(90))
-    return qv_mult(level, qv_mult(lngQuat, qv_mult(latQuat, (0, 0, radius))))
+    return qv_mult(level, qv_mult(lngQuat, qv_mult(latQuat, (0, 0, sphere_radius))))
     
-def spherePoint( mesh, position, radius = 1, size = None, color = None):
-    v = toSphere( position, radius )
-    v_tmp = toSphere( [position[0]+1, position[1]+1], radius)
-
+def spherePoint( mesh, position, sphere_radius = 1, point_size = None, color = None):
     offset = len(mesh.vertices)
+
+    v = toSphere( position, sphere_radius )
+    v_tmp = toSphere( [position[0]+1, position[1]+1], sphere_radius)
 
     theta = np.pi * .5 # 90 deg
     for i in range(4):
@@ -35,9 +38,9 @@ def spherePoint( mesh, position, radius = 1, size = None, color = None):
 
         mesh.addTexCoord( QUAD_TEXTCOORDS[i] );
 
-        if size:
+        if point_size:
             mesh.addNormal( normal );
-            mesh.addVertex( v + extrude_normal * size )
+            mesh.addVertex( v + extrude_normal * point_size )
         else:
             mesh.addNormal( extrude_normal );
             mesh.addVertex( v )
@@ -50,12 +53,34 @@ def spherePoint( mesh, position, radius = 1, size = None, color = None):
 
     return mesh
 
-def sphereSpline( mesh, positions, radius = 1, width = None, color = None):
+def sphereDot( mesh, position, sphere_radius = 1, dot_size = None, color = None):
+    dot_radius = 0.0
+    prev_mats = len(mesh.materials)
+
+    if dot_size:
+        dot_radius = dot_size
+
+    dot_mesh = tessPolygon(Mesh('Dot-'+str(prev_mats)), circle2D(0, 0, dot_radius, 6), 0, color)
+
+    #  Put on place
+    dot_mesh.translateZ(sphere_radius)
+    dot_mesh.rotateY(position[1])
+    dot_mesh.rotateX(position[0])
+    dot_mesh.rotateZ(90)
+    
+    # for i in range(len(dot_mesh.vertices)):
+        # if dot_size == None:
+
+    mesh.add(dot_mesh)
+
+    return mesh
+
+def sphereSpline( mesh, positions, sphere_radius = 1, line_width = None, color = None):
     offset = len(mesh.vertices)
 
     for i in range(1, len(positions)):
-        v_prev = toSphere( positions[i-1], radius)
-        v_this = toSphere( positions[i], radius)
+        v_prev = toSphere( positions[i-1], sphere_radius)
+        v_this = toSphere( positions[i], sphere_radius)
 
         theta = np.pi * .5 # 90 deg
         for i in range(4):
@@ -64,12 +89,12 @@ def sphereSpline( mesh, positions, radius = 1, width = None, color = None):
 
             mesh.addTexCoord( QUAD_TEXTCOORDS[i] );
 
-            if width:
+            if line_width:
                 mesh.addNormal( normalize(v_prev) );
                 if i < 2:
-                    mesh.addVertex( v_prev + np.array(normal) * width )
+                    mesh.addVertex( v_prev + np.array(normal) * line_width )
                 else:
-                    mesh.addVertex( v_this + np.array(normal) * width )
+                    mesh.addVertex( v_this + np.array(normal) * line_width )
             else:
                 mesh.addNormal( normal );
                 if i < 2:
@@ -86,7 +111,7 @@ def sphereSpline( mesh, positions, radius = 1, width = None, color = None):
 
     return mesh
 
-def spherePolygon( mesh, positions, radius = 1, color = None):
+def spherePolygon( mesh, positions, sphere_radius = 1, color = None):
     offset = len(mesh.vertices)
 
     if positions[0][0] == positions[-1][0]:
@@ -95,7 +120,7 @@ def spherePolygon( mesh, positions, radius = 1, color = None):
     points = []
     for point in positions:
         points.append(point)
-        v = toSphere(point, radius)
+        v = toSphere(point, sphere_radius)
         normal = normalize(v)
         
         mesh.vertices_texcoords([.5+point[0]/360., .5+point[1]/180.]);
@@ -119,7 +144,7 @@ def spherePolygon( mesh, positions, radius = 1, color = None):
 
     return mesh
 
-def sphere(mesh, radius = 1, resolution = 12):
+def sphere(mesh, sphere_radius = 1, resolution = 12):
     doubleRes = resolution * 2
     polarInc = np.pi / float(resolution)    # ringAngle
     azimInc = TAU / float(doubleRes)        # segAngle
@@ -141,7 +166,7 @@ def sphere(mesh, radius = 1, resolution = 12):
 
             vert = np.array( [ nx, ny, nz ] )
             mesh.addNormal( vert )
-            vert *= radius
+            vert *= sphere_radius
             mesh.addVertex( vert )
             mesh.addTexCoord( np.array(tcoord) )
 
@@ -166,7 +191,7 @@ def sphere(mesh, radius = 1, resolution = 12):
 
 
 # Port from C++ https://bitbucket.org/transporter/ogre-procedural/src/ca6eb3363a53c2b53c055db5ce68c1d35daab0d5/library/src/ProceduralIcoSphereGenerator.cpp?at=default&fileviewer=file-view-default
-def icosphere(mesh, radius = 1, resolution = 2):
+def icosphere(mesh, sphere_radius = 1, resolution = 2):
     # Step 1 : Generate icosahedron
     sqrt5 = sqrt(5.0);
     phi = (1.0 + sqrt5) * 0.5;
@@ -317,6 +342,6 @@ def icosphere(mesh, radius = 1, resolution = 2):
         mesh.addTexCoord( texCoords[i] )
 
     for i in range(0, len( mesh.vertices )):
-        mesh.vertices[i] *= radius
+        mesh.vertices[i] *= sphere_radius
 
     return mesh

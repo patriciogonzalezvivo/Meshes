@@ -7,7 +7,9 @@ from __future__ import unicode_literals
 
 import os
 import numpy as np
-from math import sqrt
+from math import sqrt, cos, sin
+from Meshes.matrix import mv_mult, mat4_rotateX, mat4_rotateY, mat4_rotateZ, mat4_translateX, mat4_translateY, mat4_translateZ, mat4_scale
+from Meshes.tools import boundingBox
 
 class Mesh(object):
     def __init__(self, name = ''):
@@ -21,7 +23,7 @@ class Mesh(object):
         self.indices_texcoords= []
         self.materials = []
 
-    def addMesh( self, mesh ):
+    def add( self, mesh ):
         offset = len(self.vertices)
 
         self.vertices.extend(mesh.vertices)
@@ -29,26 +31,28 @@ class Mesh(object):
         self.vertices_normals.extend(mesh.vertices_normals)
         self.vertices_texcoords.extend(mesh.vertices_texcoords)
 
-        for index in range(len(mesh.indices)):
-            self.indices.append( offset + mesh.indices[index] );
+        for i in range(len(mesh.indices)):
+            self.indices.append( offset + mesh.indices[i] );
 
-        for mat in mesh.materials:
-            self.materials.append( [offset + mat[0], mat[1]] )
+        for i in range(len(mesh.materials)):
+            index = offset + mesh.materials[i][0]
+            mat = mesh.materials[i][1]
+            self.addMaterial( mat, index )
 
     def addVertex( self, v ):
-        self.vertices.append( v )
+        self.vertices.append( np.array(v) )
 
     def vertexString( self, index ):
         return '%f %f %f' % (self.vertices[index][0], self.vertices[index][1], self.vertices[index][2])
 
     def addTexCoord( self, vt ):
-        self.vertices_texcoords.append( vt )
+        self.vertices_texcoords.append( np.array(vt) )
 
     def texCoordString( self, index ):
         return ' %f %f' % (self.vertices_texcoords[index][0], self.vertices_texcoords[index][1])
 
     def addNormal( self, vn ):
-        self.vertices_normals.append( vn )
+        self.vertices_normals.append( np.array(vn) )
 
     def normalString( self, index):
         n = self.vertices_normals[index]
@@ -125,8 +129,10 @@ class Mesh(object):
     def totalFaces(self):
         return int(len(self.indices)/3)
 
-    def addMaterial(self, mat):
-        self.materials.append([len(self.vertices), mat])
+    def addMaterial(self, mat, index = None):
+        if index == None:
+            index = len(self.vertices)
+        self.materials.append( [index, mat] )
 
     def clear(self):
         self.vertices = []
@@ -168,8 +174,8 @@ class Mesh(object):
                 indexNext1 = indices[i + 1]
                 indexNext2 = indices[i + 2]
 
-                e1 = np.array(verts[indexCurr]) - np.array(verts[indexNext1])
-                e2 = np.array(verts[indexNext2]) - np.array(verts[indexNext1])
+                e1 = verts[indexCurr] - verts[indexNext1]
+                e2 = verts[indexNext2] - verts[indexNext1]
                 t = np.cross(e1, e2) * -1.
                 dist = sqrt(t[0] * t[0] + t[1] * t[1] + t[2] * t[2])
                 normal = t / dist
@@ -186,14 +192,71 @@ class Mesh(object):
             if indexCurr < len(colors):
                 self.addColor(colors[indexCurr])
 
+    def rotateX(self, deg):
+        mat = mat4_rotateX(deg)
+        for i in range(len(self.vertices)):
+            self.vertices[i] = mv_mult(mat, self.vertices[i])
+
+        for i in range(len(self.vertices_normals)):
+            self.vertices_normals[i] = mv_mult(mat, self.vertices_normals[i])
+
+    def rotateY(self, deg):
+        mat = mat4_rotateY(deg)
+        for i in range(len(self.vertices)):
+            self.vertices[i] = mv_mult(mat, self.vertices[i])
+
+        for i in range(len(self.vertices_normals)):
+            self.vertices_normals[i] = mv_mult(mat, self.vertices_normals[i])
+
+    def rotateZ(self, deg):
+        mat = mat4_rotateZ(deg)
+        for i in range(len(self.vertices)):
+            self.vertices[i] = mv_mult(mat, self.vertices[i])
+
+        for i in range(len(self.vertices_normals)):
+            self.vertices_normals[i] = mv_mult(mat, self.vertices_normals[i])
+
+    def translateX(self, d):
+        mat = mat4_translateX(d)
+        for i in range(len(self.vertices)):
+            self.vertices[i] = mv_mult(mat, self.vertices[i])
+
+    def translateY(self, d):
+        mat = mat4_translateY(d)
+        for i in range(len(self.vertices)):
+            self.vertices[i] = mv_mult(mat, self.vertices[i])
+
+    def translateZ(self, d):
+        mat = mat4_translateZ(d)
+        for i in range(len(self.vertices)):
+            self.vertices[i] = mv_mult(mat, self.vertices[i])
+
+    def scale(self, sx, sy, sz):
+        mat = mat4_scale(d)
+        for i in range(len(self.vertices)):
+            self.vertices[i] = mv_mult(mat, self.vertices[i])
+
+    def center(self):
+        bbox = boundingBox(self.vertices)
+        dx = bbox[3] - bbox[0]
+        dy = bbox[4] - bbox[1]
+        dz = bbox[5] - bbox[2]
+        self.translateX(-bbox[3] + dx*.5)
+        self.translateY(-bbox[4] + dy*.5)
+        self.translateZ(-bbox[5] + dy*.5)
+
     def toObj(self, file_name = None):
         lines = '# OBJ by Patricio Gonzalez Vivo\n'
 
         # Materials Library
         if file_name != None and len(self.materials) > 0:
             mat_lines = ''
+            mat_names = []
             for mat in self.materials:
-                mat_lines += mat[1].toMtl()
+                name = mat[1].name
+                if not name in mat_names:
+                    mat_names.append(name)
+                    mat_lines += mat[1].toMtl()
 
             mat_filename = os.path.splitext(file_name)[0] + '.mtl'
             file = open( mat_filename, 'w' )

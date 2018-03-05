@@ -10,8 +10,8 @@ import numpy as np
 from math import cos, sin, sqrt, atan2, fabs
 
 def boundingBox(points):
-    min_x, min_y = float("inf"), float("inf")
-    max_x, max_y = float("-inf"), float("-inf")
+    min_x, min_y, min_z = float("inf"), float("inf"), float("inf")
+    max_x, max_y,max_z = float("-inf"), float("-inf"), float("-inf")
     for point in points:
         if point[0] < min_x:
             min_x = point[0]
@@ -22,7 +22,17 @@ def boundingBox(points):
             max_x = point[0]
         if point[1] > max_y:
             max_y = point[1]
-    return min_x, min_y, max_x, max_y
+
+        if len(point) == 3:
+            if point[2] < min_z:
+                min_z = point[2]
+            if point[2] > max_z:
+                max_z = point[2]
+    
+    if len(point) == 3:
+        return min_x, min_y, min_z, max_x, max_y, max_z
+    else:
+        return min_x, min_y, max_x, max_y
 
 def remap(value, in_min, in_max, out_min, out_max):
     in_span = in_max - in_min
