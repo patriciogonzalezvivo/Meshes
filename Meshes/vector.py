@@ -12,6 +12,13 @@ from math import cos, sin, sqrt
 def length(v):
     return sqrt(sum(n * n for n in v))
 
+def dot(v1, v2):
+    n = 0
+    lim = min( len(v1) , len(v2) )
+    for i in range(lim):
+        n += v1[i] * v2[i]
+    return n
+
 def normalize(v, tolerance=0.00001):
     mag2 = sum(n * n for n in v)
     if abs(mag2 - 1.0) > tolerance:
