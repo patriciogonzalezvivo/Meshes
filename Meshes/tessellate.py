@@ -100,7 +100,7 @@ def tessSpline( mesh, positions, z = 0.0, line_width = 0.0, color = None, flippe
             mesh.addVertex( i0 - rightNorm )
             mesh.addNormal( UP_NORMAL )
 
-        y_pct = float(i) / float( len( points ) )
+        y_pct = float(i) / float( len( points ) - 1 )
         mesh.addTexCoord( [1.0, y_pct] );
         mesh.addTexCoord( [0.0, y_pct] );
 
