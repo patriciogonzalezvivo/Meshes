@@ -1,14 +1,22 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from Meshes import Mesh, tessSpline
+import sys
+from Meshes import Mesh, extrudeLine
 
-points = [ [0.0, 0.0], [0.25, 0.0], [0.5, 0.0], [0.75, 0.0], [1.0, 0.0]]
+num_points = 50
+
+if len(sys.argv) > 1:
+    if int(sys.argv[1]):
+        num_points = int(sys.argv[1])
+
+points = []
+for i in range(0, num_points):
+    points.append([i / (num_points - 1), 0.0])
 mesh = Mesh("Spline")
-mesh = tessSpline(mesh, points, 0.0, 0.1);
-
-mesh.toObj('spline.obj')
+mesh = tessSpline(mesh, points, 0.0, 0.1)
+mesh.toPly('spline_' + str(num_points * 2) + 'v.ply')
