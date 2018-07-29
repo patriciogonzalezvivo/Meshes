@@ -10,12 +10,18 @@ from Meshes import Mesh, tessIsoRect
 import sys
 
 size = 100
+precision = 1
 
 if len(sys.argv) > 1:
     if int(sys.argv[1]):
         size = int(sys.argv[1])
 
-mesh = Mesh("Plane")
-mesh = tessIsoRect(mesh, size, size);
+if len(sys.argv) > 2:
+    if int(sys.argv[2]):
+        precision = int(sys.argv[2])
 
-mesh.toPly('plane_' + string(len(mesh.vertices))+ 'v.ply')
+
+mesh = Mesh("Plane")
+mesh = tessIsoRect(mesh, size, size, precision);
+
+mesh.toPly('plane_' + str(len(mesh.vertices))+ 'v.ply')

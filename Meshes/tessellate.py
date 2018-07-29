@@ -5,7 +5,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from math import floor
+from math import floor, ceil
 import numpy as np
 from triangle import triangulate
 
@@ -16,8 +16,8 @@ def tessIsoRect( mesh, width, height, precision = 1.0, z = 0.0, color = None):
     offset = len(mesh.vertices)
     normal = [0., 0., 1.]
 
-    w = floor(width / precision)
-    h = floor(height / precision)
+    w = ceil(width / precision)
+    h = ceil(height / precision)
     for y in range(0, int(h)):
         for x in range(0, int(w)):
             offsetX = 0
