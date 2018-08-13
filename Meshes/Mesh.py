@@ -340,9 +340,29 @@ class Mesh(object):
 
                     self.addTriangle(A[0]-1, B[0]-1, C[0]-1)
 
-                    if (A[0] != A[1] != A[2]) or (B[0] != B[1] != B[2]) or (B[0] != B[1] != B[2]):
-                        self.addTexCoordTriangle(A[1]-1, B[1]-1, C[1]-1)
-                        self.addNormalTriangle(A[2]-1, B[2]-1, C[2]-1)
+                    # if (A[0] != A[1] != A[2]) or (B[0] != B[1] != B[2]) or (C[0] != C[1] != C[2]):
+                    self.addTexCoordTriangle(A[1]-1, B[1]-1, C[1]-1)
+                    self.addNormalTriangle(A[2]-1, B[2]-1, C[2]-1)
+                elif len(args) > 3:
+                    values = []
+
+                    for i in range(len(args)):
+                        values.append( map(int, args[i].split('/')) )
+
+                    # Add first triangle
+                    self.addTriangle(values[0][0]-1, values[1][0]-1, values[2][0]-1)
+                    # if (values[0][0] != values[0][1] != values[0][2]) or (values[1][0] != values[1][1] != values[1][2]) or (values[2][0] != values[2][1] != values[2][2]):
+                    self.addTexCoordTriangle(values[0][1]-1, values[1][1]-1, values[2][1]-1)
+                    self.addNormalTriangle(values[0][2]-1, values[1][2]-1, values[2][2]-1)
+
+                    for i in range(3, len(values)):
+                        self.addTriangle(values[i-3][0]-1, values[i-1][0]-1, values[i][0]-1)
+                        # if (values[i-3][0] != values[i-3][1] != values[i-3][2]) or (values[i-1][0] != values[i-1][1] != values[i-1][2]) or (values[i][0] != values[i][1] != values[i][2]):
+                        self.addTexCoordTriangle(values[i-3][1]-1, values[i-1][1]-1, values[i][1]-1)
+                        self.addNormalTriangle(values[i-3][2]-1, values[i-1][2]-1, values[i][2]-1)
+
+
+
 
     def toPly(self, file_name = None):
         lines = '''ply

@@ -1,6 +1,6 @@
 # Meshes
 
-Simple Python 2/3 module to make PLY/OBJ geometries
+Simple Python 2/3 module to load/make/parse/save PLY/OBJ geometries
 
 ## Install
 
@@ -10,10 +10,16 @@ Simple Python 2/3 module to make PLY/OBJ geometries
 sudo easy_install pip
 ``` 
 
-* Clone and run the install script
+* Clone this repo:
 
 ```bash
 git clone git@github.com:patriciogonzalezvivo/Meshes.git
 cd Meshes
-make
+```
+
+* Run the install script directly with `make` or manually do:
+
+```bash
+pip install -r requirements.txt
+python setup.py install
 ```
