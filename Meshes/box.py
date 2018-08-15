@@ -62,14 +62,13 @@ def box(mesh, width, height, depth, resX, resY, resZ):
 
             # first triangle
             mesh.addIndex((y) * resX + x + vertOffset)
-            mesh.addIndex((y + 1) * resX + x + vertOffset)
             mesh.addIndex((y) * resX + x + 1 + vertOffset)
+            mesh.addIndex((y + 1) * resX + x + vertOffset)
 
             # second triangle
             mesh.addIndex((y) * resX + x + 1 + vertOffset)
-            mesh.addIndex((y + 1) * resX + x + vertOffset)
             mesh.addIndex((y + 1) * resX + x + 1 + vertOffset)
-        
+            mesh.addIndex((y + 1) * resX + x + vertOffset)
 
     vertOffset = len(mesh.vertices)
 
@@ -96,14 +95,13 @@ def box(mesh, width, height, depth, resX, resY, resZ):
         for x in range(resZ - 1):
             # first triangle
             mesh.addIndex((y) * resZ + x + vertOffset)
-            mesh.addIndex((y + 1) * resZ + x + vertOffset)
             mesh.addIndex((y) * resZ + x + 1 + vertOffset)
+            mesh.addIndex((y + 1) * resZ + x + vertOffset)
 
             # second triangle
             mesh.addIndex((y) * resZ + x + 1 + vertOffset)
-            mesh.addIndex((y + 1) *resZ + x + vertOffset)
-            mesh.addIndex((y + 1) *resZ + x + 1 + vertOffset)
-        
+            mesh.addIndex((y + 1) * resZ + x + 1 + vertOffset)
+            mesh.addIndex((y + 1) * resZ + x + vertOffset)
 
     vertOffset = len(mesh.vertices)
 
@@ -131,14 +129,13 @@ def box(mesh, width, height, depth, resX, resY, resZ):
         for x in range(resZ - 1):
             # first triangle
             mesh.addIndex((y) * resZ + x + vertOffset)
-            mesh.addIndex((y + 1) * resZ + x + vertOffset)
             mesh.addIndex((y) * resZ + x + 1 + vertOffset)
+            mesh.addIndex((y + 1) * resZ + x + vertOffset)
 
             # second triangle
             mesh.addIndex((y) * resZ + x + 1 + vertOffset)
-            mesh.addIndex((y + 1) * resZ + x + vertOffset)
             mesh.addIndex((y + 1) * resZ + x + 1 + vertOffset)
-        
+            mesh.addIndex((y + 1) * resZ + x + vertOffset)
 
     vertOffset = len(mesh.vertices)
 
@@ -166,14 +163,13 @@ def box(mesh, width, height, depth, resX, resY, resZ):
         for x in range(resX - 1):
             # first triangle
             mesh.addIndex((y) * resX + x + vertOffset)
-            mesh.addIndex((y + 1) * resX + x + vertOffset)
             mesh.addIndex((y) * resX + x + 1 + vertOffset)
+            mesh.addIndex((y + 1) * resX + x + vertOffset)
 
             # second triangle
             mesh.addIndex((y) * resX + x + 1 + vertOffset)
-            mesh.addIndex((y + 1) * resX + x + vertOffset)
             mesh.addIndex((y + 1) * resX + x + 1 + vertOffset)
-        
+            mesh.addIndex((y + 1) * resX + x + vertOffset)
 
     vertOffset = len(mesh.vertices)
 
@@ -201,12 +197,12 @@ def box(mesh, width, height, depth, resX, resY, resZ):
         for x in range(resX - 1):
             # first triangle
             mesh.addIndex((y) * resX + x + vertOffset)
-            mesh.addIndex((y) * resX + x + 1 + vertOffset)
             mesh.addIndex((y + 1) * resX + x + vertOffset)
+            mesh.addIndex((y) * resX + x + 1 + vertOffset)
 
             # second triangle
-            mesh.addIndex((y) * resX + x + 1 + vertOffset)
             mesh.addIndex((y + 1) * resX + x + 1 + vertOffset)
+            mesh.addIndex((y) * resX + x + 1 + vertOffset)
             mesh.addIndex((y + 1) * resX + x + vertOffset)
         
 
@@ -236,12 +232,12 @@ def box(mesh, width, height, depth, resX, resY, resZ):
         for x in range(resX - 1):
             # first triangle
             mesh.addIndex((y) * resX + x + vertOffset)
-            mesh.addIndex((y) * resX + x + 1 + vertOffset)
             mesh.addIndex((y + 1) * resX + x + vertOffset)
+            mesh.addIndex((y) * resX + x + 1 + vertOffset)
 
             # second triangle
-            mesh.addIndex((y) * resX + x + 1 + vertOffset)
             mesh.addIndex((y + 1) * resX + x + 1 + vertOffset)
+            mesh.addIndex((y) * resX + x + 1 + vertOffset)
             mesh.addIndex((y + 1) * resX + x + vertOffset)
         
     return mesh
