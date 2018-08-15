@@ -372,6 +372,10 @@ property float x
 property float y
 property float z
 '''
+        if len(self.vertices_normals) > 0:
+            lines += 'property float nx\n'
+            lines += 'property float ny\n'
+            lines += 'property float nx\n'
 
         if len(self.vertices_colors) > 0:
             if len(self.vertices_colors[0]) == 3:
@@ -388,23 +392,18 @@ property float z
             lines += 'property float u\n'
             lines += 'property float v\n'
 
-        if len(self.vertices_normals) > 0:
-            lines += 'property float nx\n'
-            lines += 'property float ny\n'
-            lines += 'property float nx\n'
-
         lines += '''element face '''+str( self.totalFaces() )+'''
 property list uchar int vertex_indices
 end_header
 '''
         for index in range( len(self.vertices) ):
             line = self.vertexString( index )
+            if len(self.vertices_normals) > 0:
+                line += self.normalString( index )
             if len(self.vertices_colors) > 0:
                 line += self.colorString( index )
             if len(self.vertices_texcoords) > 0:
                 line += self.texCoordString( index )
-            if len(self.vertices_normals) > 0:
-                line += self.normalString( index )
             
             lines += line+'\n'
 
