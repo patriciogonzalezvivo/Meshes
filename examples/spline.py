@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 import sys
 from Meshes import Mesh, extrudeLine
 
-num_points = 50
+num_points = 3
 
 if len(sys.argv) > 1:
     if int(sys.argv[1]):
@@ -17,6 +17,8 @@ if len(sys.argv) > 1:
 points = []
 for i in range(0, num_points):
     points.append([i / (num_points - 1), 0.0])
+
 mesh = Mesh("Spline")
-mesh = tessSpline(mesh, points, 0.0, 0.1)
+mesh = extrudeLine(mesh, points, 0.0, 0.1)
+
 mesh.toPly('spline_' + str(num_points * 2) + 'v.ply')

@@ -132,7 +132,7 @@ def extrudeLine( mesh, positions, z = 0.0, line_width = 0.0, color = None, flipp
         mesh.addColor( color )
         mesh.addColor( color )
 
-    for i in range(0, len( points ) - 1 ):
+    for i in range(len( points ) - 1 ):
         mesh.addIndex(offset + 2 * i + 3)
         mesh.addIndex(offset + 2 * i + 2)
         mesh.addIndex(offset + 2 * i )
