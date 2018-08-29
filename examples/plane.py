@@ -5,7 +5,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from Meshes import Mesh, tessIsoRect
+from Meshes import Mesh, tessRect, tessIsoRect
 
 import sys
 
@@ -22,6 +22,6 @@ if len(sys.argv) > 2:
 
 
 mesh = Mesh("Plane")
-mesh = tessIsoRect(mesh, size, size, precision);
+mesh = tessRect(mesh, size, size, precision);
 
-mesh.toPly('plane_' + str(len(mesh.vertices))+ 'v.ply')
+mesh.toPly('plane.ply')

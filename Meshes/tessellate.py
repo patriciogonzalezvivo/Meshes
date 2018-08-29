@@ -52,6 +52,45 @@ def tessIsoRect( mesh, width, height, precision = 1.0, z = 0.0, color = None):
                 mesh.addIndex(offset + x + y * w)               # a
     return mesh
 
+def tessRect( mesh, width, height, precision = 1.0, z = 0.0, color = None):
+    offset = len(mesh.vertices)
+    normal = [0., 0., 1.]
+
+    w = ceil(width / precision)
+    h = ceil(height / precision)
+    for y in range(0, int(h)):
+        for x in range(0, int(w)):
+            # offsetX = 0
+            # if x%2 == 1:
+            #     offsetY = 0.5 
+            # else:
+            #     offsetY = 0.0
+
+            mesh.addVertex( [float(x) * precision, (y) * precision, z] )
+            if color:
+                mesh.addColor( color )
+            mesh.addNormal( normal )
+            mesh.addTexCoord( [float(x)/float(w), float(y)/float(h)] )
+    
+    for y in range(0, int(h)-1):
+        for x in range(0, int(w)-1):
+            if x%2 == 0:
+                mesh.addIndex(offset + x + y * w)               # a
+                mesh.addIndex(offset + (x + 1) + y * w)         # b
+                mesh.addIndex(offset + x + (y + 1) * w)         # d
+                
+                mesh.addIndex(offset + (x + 1) + y * w)         # b
+                mesh.addIndex(offset + (x + 1) + (y + 1) * w)   # c
+                mesh.addIndex(offset + x + (y + 1) * w)         # d
+            else:
+                mesh.addIndex(offset + (x + 1) + (y + 1) * w)   # c
+                mesh.addIndex(offset + x + y * w)               # a
+                mesh.addIndex(offset + (x + 1 ) + y * w)        # b
+                
+                mesh.addIndex(offset + (x + 1) + (y + 1) * w)   # c
+                mesh.addIndex(offset + x + (y + 1) * w)         # d
+                mesh.addIndex(offset + x + y * w)               # a
+    return mesh
 
 def tessPolygon( mesh, positions, z, color = None, flipped = False):
     offset = len(mesh.vertices)

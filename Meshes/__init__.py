@@ -12,5 +12,5 @@ from box import box
 from path import rect2D, rectRound2D, circle2D
 
 # Functions
-from tessellate import tessIsoRect, tessPolygon
+from tessellate import tessRect, tessIsoRect, tessPolygon
 from extrude import extrudeLine
