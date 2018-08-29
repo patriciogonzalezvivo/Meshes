@@ -30,7 +30,7 @@ def tessIsoRect( mesh, width, height, precision = 1.0, z = 0.0, color = None):
             if color:
                 mesh.addColor( color )
             mesh.addNormal( normal )
-            mesh.addTexCoord( [float(x+offsetX)/float(w), float(y+offsetY)/float(h)] )
+            mesh.addTexCoord( [float(x+offsetX)/float(w-1), float(y+offsetY)/float(h-1)] )
     
     for y in range(0, int(h)-1):
         for x in range(0, int(w)-1):
@@ -60,17 +60,11 @@ def tessRect( mesh, width, height, precision = 1.0, z = 0.0, color = None):
     h = ceil(height / precision)
     for y in range(0, int(h)):
         for x in range(0, int(w)):
-            # offsetX = 0
-            # if x%2 == 1:
-            #     offsetY = 0.5 
-            # else:
-            #     offsetY = 0.0
-
             mesh.addVertex( [float(x) * precision, (y) * precision, z] )
             if color:
                 mesh.addColor( color )
             mesh.addNormal( normal )
-            mesh.addTexCoord( [float(x)/float(w), float(y)/float(h)] )
+            mesh.addTexCoord( [float(x)/float(w-1), float(y)/float(h-1)] )
     
     for y in range(0, int(h)-1):
         for x in range(0, int(w)-1):
