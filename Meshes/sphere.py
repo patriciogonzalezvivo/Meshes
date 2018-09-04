@@ -162,7 +162,7 @@ def sphere(mesh, sphere_radius = 1, resolution = 12):
             nx = tr * sin(float(j) * azimInc)
             nz = tr * cos(float(j) * azimInc)
 
-            tcoord[0] = float(j) / doubleRes
+            tcoord[0] = float(j) / float(doubleRes)
 
             vert = np.array( [ nx, ny, nz ] )
             mesh.addNormal( vert )
@@ -332,7 +332,7 @@ def icosphere(mesh, sphere_radius = 1, resolution = 2):
             if mesh.indices[j] == index:
                 index1 = mesh.indices[ int((j+1)%3+(j/3)*3) ]
                 index2 = mesh.indices[ int((j+2)%3+(j/3)*3) ]
-                if (texCoords[index1][0] > 0.5) or (texCoords[index2][0] >0.5):
+                if (texCoords[index1][0] > 0.5) or (texCoords[index2][0] > 0.5):
                     mesh.indices[j] = newIndex;
 
     for i in range(0, len(mesh.vertices)):
