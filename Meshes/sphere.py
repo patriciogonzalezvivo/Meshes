@@ -144,7 +144,9 @@ def spherePolygon( mesh, positions, sphere_radius = 1, color = None):
 
     return mesh
 
-def sphere(mesh, sphere_radius = 1, resolution = 12):
+def sphere(mesh, sphere_radius = 1, resolution = 12, color = None):
+    offset = len(mesh.vertices)
+
     doubleRes = resolution * 2
     polarInc = np.pi / float(resolution)    # ringAngle
     azimInc = TAU / float(doubleRes)        # segAngle
@@ -168,6 +170,8 @@ def sphere(mesh, sphere_radius = 1, resolution = 12):
             mesh.addNormal( vert )
             vert *= sphere_radius
             mesh.addVertex( vert )
+            if color:
+                mesh.addColor( color )
             mesh.addTexCoord( np.array(tcoord) )
 
     nr = doubleRes + 1
@@ -175,16 +179,16 @@ def sphere(mesh, sphere_radius = 1, resolution = 12):
         for ix in range( doubleRes ):
             # first tri
             if iy > 0:
-                mesh.addIndex((iy+0) * (nr) + (ix+0)) # 1
-                mesh.addIndex((iy+0) * (nr) + (ix+1)) # 2
-                mesh.addIndex((iy+1) * (nr) + (ix+0)) # 3
+                mesh.addIndex(offset + (iy+0) * (nr) + (ix+0)) # 1
+                mesh.addIndex(offset + (iy+0) * (nr) + (ix+1)) # 2
+                mesh.addIndex(offset + (iy+1) * (nr) + (ix+0)) # 3
                 
 
             #second tri
             if iy < resolution-1:
-                mesh.addIndex((iy+0) * (nr) + (ix+1)) # 1
-                mesh.addIndex((iy+1) * (nr) + (ix+1)) # 2
-                mesh.addIndex((iy+1) * (nr) + (ix+0)) # 3
+                mesh.addIndex(offset + (iy+0) * (nr) + (ix+1)) # 1
+                mesh.addIndex(offset + (iy+1) * (nr) + (ix+1)) # 2
+                mesh.addIndex(offset + (iy+1) * (nr) + (ix+0)) # 3
                 
 
     return mesh
@@ -192,6 +196,7 @@ def sphere(mesh, sphere_radius = 1, resolution = 12):
 
 # Port from C++ https://bitbucket.org/transporter/ogre-procedural/src/ca6eb3363a53c2b53c055db5ce68c1d35daab0d5/library/src/ProceduralIcoSphereGenerator.cpp?at=default&fileviewer=file-view-default
 def icosphere(mesh, sphere_radius = 1, resolution = 2):
+
     # Step 1 : Generate icosahedron
     sqrt5 = sqrt(5.0);
     phi = (1.0 + sqrt5) * 0.5;

@@ -60,7 +60,9 @@ def tessRect( mesh, width, height, precision = 1.0, z = 0.0, color = None):
     h = ceil(height / precision)
     for y in range(0, int(h)):
         for x in range(0, int(w)):
-            mesh.addVertex( [float(x) * precision, (y) * precision, z] )
+            mesh.addVertex( [float(x) * precision - float(width) * 0.5, 
+                             float(y) * precision - float(height) * 0.5, 
+                             z] )
             if color:
                 mesh.addColor( color )
             mesh.addNormal( normal )
