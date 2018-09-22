@@ -9,7 +9,7 @@ import numpy as np
 
 from Meshes.Mesh import Mesh
 
-def box(mesh, width, height, depth, resX, resY, resZ):
+def box(mesh, width, height, depth, resX, resY, resZ, color = None):
     resX = resX + 1
     resY = resY + 1
     resZ = resZ + 1
@@ -55,6 +55,8 @@ def box(mesh, width, height, depth, resX, resY, resZ):
             mesh.addVertex( np.array( vert ) ) 
             mesh.addTexCoord( np.array( texcoord ) )
             mesh.addNormal( np.array( normal ) )
+            if color:
+                mesh.addColor( color )
     
 
     for y in range(resY - 1):
@@ -89,6 +91,8 @@ def box(mesh, width, height, depth, resX, resY, resZ):
             mesh.addVertex( np.array( vert ) ) 
             mesh.addTexCoord( np.array( texcoord ) )
             mesh.addNormal( np.array( normal ) )
+            if color:
+                mesh.addColor( color )
         
 
     for y in range(resY - 1):
@@ -123,6 +127,8 @@ def box(mesh, width, height, depth, resX, resY, resZ):
             mesh.addVertex( np.array( vert ) ) 
             mesh.addTexCoord( np.array( texcoord ) )
             mesh.addNormal( np.array( normal ) )
+            if color:
+                mesh.addColor( color )
         
 
     for y in range(resY - 1):
@@ -157,6 +163,8 @@ def box(mesh, width, height, depth, resX, resY, resZ):
             mesh.addVertex( np.array( vert ) ) 
             mesh.addTexCoord( np.array( texcoord ) )
             mesh.addNormal( np.array( normal ) )
+            if color:
+                mesh.addColor( color )
         
 
     for y in range(resY - 1):
@@ -191,6 +199,8 @@ def box(mesh, width, height, depth, resX, resY, resZ):
             mesh.addVertex( np.array( vert ) ) 
             mesh.addTexCoord( np.array( texcoord ) )
             mesh.addNormal( np.array( normal ) )
+            if color:
+                mesh.addColor( color )
         
 
     for y in range(resZ - 1):
@@ -226,6 +236,8 @@ def box(mesh, width, height, depth, resX, resY, resZ):
             mesh.addVertex( np.array( vert ) ) 
             mesh.addTexCoord( np.array( texcoord ) )
             mesh.addNormal( np.array( normal ) )
+            if color:
+                mesh.addColor( color )
         
 
     for y in range(resZ - 1):
