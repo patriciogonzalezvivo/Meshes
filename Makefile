@@ -1,6 +1,6 @@
 all:
-	pip install -r requirements.txt
-	python setup.py install
+	pip2 install -r requirements.txt
+	python2 setup.py install
 
 clean:
 	rm -rf build
