@@ -144,7 +144,7 @@ class Mesh(object):
 
     def invertNormals(self):
         # tig: flip face(=triangle) winding order, so that we are consistent with all other ofPrimitives.
-        # i wish there was a more elegant way to do this, but anything happening before "split vertices"
+        # i wish there was a more elegant way to do this, but anything happening before 'split vertices'
         # makes things very, very complicated.
         for i in range(0, len(self.indices))[::3]:
             tmp = self.indices[i+1]
@@ -361,9 +361,6 @@ class Mesh(object):
                         self.addTexCoordTriangle(values[i-3][1]-1, values[i-1][1]-1, values[i][1]-1)
                         self.addNormalTriangle(values[i-3][2]-1, values[i-1][2]-1, values[i][2]-1)
 
-
-
-
     def toPly(self, file_name = None):
         lines = '''ply
 format ascii 1.0
@@ -416,3 +413,204 @@ end_header
             file.close()
         else:
             return lines
+
+    def fromPly(self, file_name):
+        lineNum = -1
+
+        class Enum(set):
+            def __getattr__(self, name):
+                if name in self:
+                    return name
+                raise AttributeError
+
+        State = Enum(["Header", "VertexDef", "FaceDef", "Vertices", "Normals", "Faces"])
+        state = State.Header
+
+        orderVertices = -1
+        orderIndices = -1
+
+        expectedVertices = 0
+        expectedFaces = 0
+
+        vertexCoordsFound = 0
+        colorCompsFound = 0
+        texCoordsFound = 0
+        normalsCoordsFound = 0
+
+        currentVertex = 0
+        currentFace = 0
+
+        floatColor = False
+
+        for line in open(file_name, 'r'):
+            lineNum += 1
+            # get rid of the new line
+            line = line.rstrip()
+            # print(str(lineNum) + " " + line)
+
+            if lineNum == 0:
+                if line != 'ply':
+                    print("wrong format, expecting 'ply'")
+                    return
+            elif lineNum == 1:
+                if line != "format ascii 1.0":
+                    print("wrong format, expecting 'format ascii 1.0'")
+                    return
+            
+            if 'comment' in line:
+                continue
+
+            # HEADER 
+            if (state==State.Header or state==State.FaceDef) and line.startswith('element vertex'):
+                state = State.VertexDef
+                orderVertices = max(orderIndices, 0)+1
+                expectedVertices = int(line[15:])
+                # print(state)
+                # print(line[15:])
+                continue;
+
+            if (state==State.Header or state==State.VertexDef) and line.startswith('element face'):
+                state = State.FaceDef
+                orderIndices = max(orderVertices, 0)+1
+                expectedFaces = int(line[13:])
+                # print(state)
+                # print(line[13:])
+                continue
+
+            # Vertex Def
+            if state==State.VertexDef:
+
+                if line.startswith('property float x') or line.startswith('property float y') or line.startswith('property float z'):
+                    vertexCoordsFound += 1
+                    # print('vertexCoordsFound ' + str(vertexCoordsFound))
+                    continue
+
+                if line.startswith('property float nx') or line.startswith('property float ny') or line.startswith('property float nz'):
+                    normalsCoordsFound += 1
+                    # print('normalsCoordsFound ' + str(normalsCoordsFound))
+                    continue
+
+                if line.startswith('property float r') or line.startswith('property float g') or line.startswith('property float b') or line.startswith('property float a'):
+                    colorCompsFound += 1
+                    # print('colorCompsFound ' + str(colorCompsFound))
+                    floatColor = True
+                    continue
+            
+                if line.startswith('property uchar red') or line.startswith('property uchar green') or line.startswith('property uchar blue') or line.startswith('property uchar alpha'):
+                    colorCompsFound += 1
+                    # print('colorCompsFound ' + str(colorCompsFound))
+                    floatColor = False
+                    continue
+
+                if line.startswith('property float u') or line.startswith('property float v'):
+                    texCoordsFound += 1
+                    # print('texCoordsFound ' + str(texCoordsFound))
+                    continue
+
+                if line.startswith('property float texture_u') or line.startswith('property float texture_v'):
+                    texCoordsFound += 1
+                    # print('texCoordsFound ' + str(texCoordsFound))
+                    continue
+
+            # if state==State.FaceDef and line.find('property list')!=0 and line!='end_header':
+            #     print('wrong face definition')
+
+            if line=='end_header':
+                # Check that all basic elements seams ok and healthy
+                if colorCompsFound > 0 and colorCompsFound < 3:
+                    print('data has color coordiantes but not correct number of components. Found ' + str(colorCompsFound) + ' expecting 3 or 4')
+                    return
+
+                if normalsCoordsFound != 3:
+                    print('data has normal coordiantes but not correct number of components. Found ' + str(normalsCoordsFound) + ' expecting 3')
+                    return
+
+                if expectedVertices == 0:
+                    print('mesh loaded has no vertices')
+                    return
+
+                if orderVertices == -1:
+                    orderVertices = 9999
+                if orderIndices == -1:
+                    orderIndices = 9999;
+
+                if orderVertices < orderIndices:
+                    state = State.Vertices
+                else:
+                    state = State.Faces
+
+                continue
+            
+            if state == State.Vertices:
+                values = line.split()
+
+                # Extract vertex
+                v = [0.0, 0.0, 0.0]
+                v[0] = float(values.pop(0))
+                v[1] = float(values.pop(0))
+                if vertexCoordsFound > 2:
+                    v[2] = float(values.pop(0))
+                self.addVertex(np.array(v))
+
+                # Extract normal
+                if normalsCoordsFound > 0:
+                    n = [0.0, 0.0, 0.0]
+                    n[0] = float(values.pop(0))
+                    n[1] = float(values.pop(0))
+                    n[2] = float(values.pop(0))
+                    self.addNormal(np.array(n))
+
+                # Extract color
+                if colorCompsFound > 0:
+                    c = [1.0, 1.0, 1.0, 1.0]
+                    div = 255.0
+                    if floatColor:
+                        div = 1.0
+
+                    c[0] = float(values.pop(0))/div
+                    c[1] = float(values.pop(0))/div
+                    c[2] = float(values.pop(0))/div
+                    if colorCompsFound > 3:
+                        c[3] = float(values.pop(0))/div
+                    self.addColor(np.array(c))
+
+                # Extract UVs
+                if texCoordsFound > 0:
+                    uv = [0.0, 0.0]
+                    uv[0] = float(values.pop(0))
+                    uv[1] = float(values.pop(0))
+                    self.addTexCoord(np.array(uv))
+
+                if len(self.vertices) == expectedVertices:
+                    if orderVertices < orderIndices:
+                        state = State.Faces
+                    else:
+                        state = State.Vertices
+                    continue
+
+            if state == State.Faces:
+                values = line.split()
+                numV = int(values.pop(0))
+
+                if numV != 3:
+                    print("face not a triangle")
+
+                for i in range(numV):
+                    index = int(values.pop(0))
+                    self.addIndex( index )
+                    if normalsCoordsFound:
+                        self.addNormalIndex(index)
+                    if texCoordsFound:
+                        self.addTexCoordIndex(index)
+
+                if currentFace == expectedFaces:
+                    print("finish w indices")
+                    if orderVertices<orderIndices:
+                        state = State.Vertices
+                    else:
+                        state = State.Faces
+                    continue
+
+                currentFace += 1
+
+
