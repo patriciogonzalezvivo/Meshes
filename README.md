@@ -17,7 +17,7 @@ git clone git@github.com:patriciogonzalezvivo/Meshes.git
 cd Meshes
 ```
 
-* Run the install script directly with `make` or manually do:
+* Run the install script directly with `make install` or manually do:
 
 ```bash
 pip install -r requirements.txt
