@@ -23,3 +23,9 @@ cd Meshes
 pip install -r requirements.txt
 python setup.py install
 ```
+
+Or use the Makefile by:
+
+```bash
+make install
+```
