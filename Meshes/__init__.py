@@ -5,8 +5,9 @@ from Mesh import Mesh
 from Material import Material
 
 # 3D Primitives
-from sphere import sphere, spherePoint, sphereDot, sphereSpline, spherePolygon, icosphere
 from box import box
+from sphere import sphere, spherePoint, sphereDot, sphereSpline, spherePolygon, icosphere
+from billboards import circle, halfcircle, square
 
 # 2D primitives
 from path import rect2D, rectRound2D, circle2D
