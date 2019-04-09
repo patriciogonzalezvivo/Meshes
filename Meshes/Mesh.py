@@ -424,8 +424,8 @@ property float z
                 lines += 'property float a\n'
 
         if len(self.vertices_texcoords) > 0:
-            lines += 'property float u\n'
-            lines += 'property float v\n'
+            lines += 'property float texture_u\n'
+            lines += 'property float texture_v\n'
 
         if len( self.indices ) > 2:
             lines += 'element face '+str( self.totalFaces() )+'\n'
