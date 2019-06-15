@@ -24,14 +24,4 @@ if len(sys.argv) > 2:
 mesh = Mesh("Sphere")
 mesh = sphere(mesh, size, precision, color=[1.0,0.0,0.0]);
 
-print(mesh.totalVertices())
-print(len(mesh.vertices_texcoords))
-# print(mesh.vertexBuffer())
-print(mesh.colorBuffer())
-# print(mesh.normalBuffer())
-# print(mesh.texCoordBuffer())
-# print(mesh.indexBuffer())
-# print(mesh.loopStartsBuffer())
-# print(mesh.loopLengthsBuffer())
-
 mesh.toPly('sphere_' + str(len(mesh.vertices))+ 'v.ply')

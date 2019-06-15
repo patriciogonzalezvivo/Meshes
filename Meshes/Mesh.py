@@ -750,4 +750,53 @@ property float z
 
                 currentFace += 1
 
+    def toBlenderMesh( self, blender_mesh ):
+
+        # Vertices and edges (straightforward)
+        blender_mesh.vertices.add( self.totalVertices() )
+        blender_mesh.vertices.foreach_set("co", self.vertexBuffer() )
+
+        # Setting edges is optional, as they get created automatically for
+        # any provided polygons. However, if you need edges that exist separately
+        # from polygons then use this array.
+        # XXX these edges only seem to show up after going in-and-out of edit mode.
+        blender_mesh.edges.add( self.totalEdges() )
+        blender_mesh.edges.foreach_set("vertices", self.edgeBuffer() )
+
+        # Polygons are defined in loops. Here, we define one quad and two triangles
+        blender_mesh.loops.add( self.totalIndices() )
+        blender_mesh.loops.foreach_set("vertex_index", self.indexBuffer() )
+
+        # For each polygon the start of its vertex indices in the vertex_index array
+        blender_mesh.polygons.add( self.totalFaces() )
+        blender_mesh.polygons.foreach_set("loop_start", self.faceOffsetBuffer() )
+        blender_mesh.polygons.foreach_set("loop_total", self.faceLengthBuffer() ) # Length of each polygon in number of vertices
+
+        # Texture coordinates per vertex *per polygon loop*.
+        # Create UV coordinate layer and set values
+        if len(self.vertices_texcoords) > 0:
+            uv_layer = blender_mesh.uv_layers.new()
+            for i, uv in enumerate(uv_layer.data):
+                index = self.indices[i]
+                uv.uv = self.vertices_texcoords[index]
+
+
+        # Vertex color per vertex *per polygon loop*    
+        # Create vertex color layer and set values
+        if len(self.vertices_colors) > 0:
+            vcol_lay = blender_mesh.vertex_colors.new()
+            for i, col in enumerate(vcol_lay.data):
+                index = self.indices[i]
+                col.color[0] = self.vertices_colors[index][0]
+                col.color[1] = self.vertices_colors[index][1]
+                col.color[2] = self.vertices_colors[index][2]
+                col.color[3] = 1.0                     # Alpha?
+            
+        # We're done setting up the mesh values, update mesh object and 
+        # let Blender do some checks on it
+        blender_mesh.update()
+        blender_mesh.validate()
+
+        return blender_mesh
+
 
