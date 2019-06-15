@@ -46,7 +46,7 @@ def spherePoint( mesh, position, sphere_radius = 1, point_size = None, color = N
             mesh.addVertex( v )
 
         if color:
-            mesh.addColor(color)
+            mesh.addColor( color )
 
     mesh.addTriangle( offset, offset + 1, offset + 2 )
     mesh.addTriangle( offset + 2, offset + 3, offset )
@@ -195,7 +195,7 @@ def sphere(mesh, sphere_radius = 1, resolution = 12, color = None):
 
 
 # Port from C++ https://bitbucket.org/transporter/ogre-procedural/src/ca6eb3363a53c2b53c055db5ce68c1d35daab0d5/library/src/ProceduralIcoSphereGenerator.cpp?at=default&fileviewer=file-view-default
-def icosphere(mesh, sphere_radius = 1, resolution = 2):
+def icosphere(mesh, sphere_radius = 1, resolution = 2, color = None):
 
     # Step 1 : Generate icosahedron
     sqrt5 = sqrt(5.0);
@@ -214,6 +214,10 @@ def icosphere(mesh, sphere_radius = 1, resolution = 2):
     mesh.addVertex(invnorm * np.array([0,   -1,  phi]))#9
     mesh.addVertex(invnorm * np.array([-1,-phi, 0]))  #10
     mesh.addVertex(invnorm * np.array([ 1,-phi, 0]))  #11
+
+    if color:
+        for i in range(12):
+            mesh.addColor( color )
          
     firstFaces = [
         0,1,2,
@@ -263,6 +267,10 @@ def icosphere(mesh, sphere_radius = 1, resolution = 2):
             mesh.vertices.append(np.array(normalize( v1 + v2 )))
             mesh.vertices.append(np.array(normalize( v2 + v3 )))
             mesh.vertices.append(np.array(normalize( v1 + v3 )))
+
+            if color:
+                for i in range(3):
+                    mesh.addColor( color )
 
             # now recreate indices
             newFaces.append(i1)
@@ -327,8 +335,11 @@ def icosphere(mesh, sphere_radius = 1, resolution = 2):
         # duplicate vertex
         v = mesh.vertices[index]
         t = texCoords[index] + np.array( [1., 0.] )
+
         mesh.vertices.append(v)
         texCoords.append(t)
+        if color:
+           mesh.addColor( color )
         
         newIndex = len(mesh.vertices)-1
 

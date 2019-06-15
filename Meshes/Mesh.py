@@ -11,6 +11,11 @@ from math import sqrt, cos, sin
 from Meshes.matrix import mv_mult, mat4_rotateX, mat4_rotateY, mat4_rotateZ, mat4_translateX, mat4_translateY, mat4_translateZ, mat4_scale
 from Meshes.tools import boundingBox
 
+try:
+    basestring
+except NameError:
+    basestring = str
+
 class Mesh(object):
     def __init__(self, name = ''):
         self.name = name
@@ -41,24 +46,69 @@ class Mesh(object):
             mat = mesh.materials[i][1]
             self.addMaterial( mat, index )
 
+    # VERTICES
+
     def addVertex( self, v ):
         self.vertices.append( np.array(v) )
+
+    def totalVertices( self ):
+        return len(self.vertices)
 
     def vertexString( self, index ):
         return '%f %f %f' % (self.vertices[index][0], self.vertices[index][1], self.vertices[index][2])
 
+    def vertexBuffer( self ):
+        buffer = []
+        for vertex in self.vertices:
+            buffer.extend( vertex )
+        return np.array(buffer, dtype=np.float32)
+
+    # TEXCOORDS
+
     def addTexCoord( self, vt ):
         self.vertices_texcoords.append( np.array(vt) )
+
+    def addTexCoordIndex( self, index ):
+        self.indices_texcoords.append( index );
+
+    def addTexCoordTriangle( self, i1, i2, i3 ):
+        self.addTexCoordIndex( i1 )
+        self.addTexCoordIndex( i2 )
+        self.addTexCoordIndex( i3 )
 
     def texCoordString( self, index ):
         return ' %f %f' % (self.vertices_texcoords[index][0], self.vertices_texcoords[index][1])
 
+    def texCoordBuffer( self):
+        buffer = []
+        for vertex in self.vertices_texcoords:
+            buffer.extend( vertex )
+        return np.array(buffer, dtype=np.float32)
+
+    # NORMALS
+
     def addNormal( self, vn ):
         self.vertices_normals.append( np.array(vn) )
+
+    def addNormalIndex( self, index ):
+        self.indices_normals.append( index )
+
+    def addNormalTriangle( self, i1, i2, i3 ):
+        self.addNormalIndex( i1 )
+        self.addNormalIndex( i2 )
+        self.addNormalIndex( i3 )
 
     def normalString( self, index):
         n = self.vertices_normals[index]
         return ' %f %f %f' % (n[0], n[1], n[2])
+
+    def normalBuffer( self):
+        buffer = []
+        for vertex in self.vertices_normals:
+            buffer.extend( vertex )
+        return np.array(buffer, dtype=np.float32)
+
+    # COLORS
 
     def addColor( self, vc ):
         if isinstance(vc, basestring) or isinstance(vc, str):
@@ -78,8 +128,54 @@ class Mesh(object):
             else:
                 return ' %f %f %f' % (self.vertices_colors[index][0], self.vertices_colors[index][1], self.vertices_colors[index][2])
     
+    def colorBuffer( self ):
+        buffer = []
+        for vertex in self.vertices_colors:
+            buffer.extend( vertex )
+        return np.array(buffer, dtype=np.float32)
+
+    # EDGES
+
+    def addEdge( self, i1, i2, color = None ):
+        self.edge_indices.append( i1 );
+        self.edge_indices.append( i2 );
+        if color:
+            self.edge_color.append( color )
+
+    def totalEdges( self ):
+        return int(len(self.edge_indices)/2)
+
+    def edgeString( self, number ):
+        v1 = self.edge_indices[number*2]
+        v2 = self.edge_indices[number*2+1]
+
+        string = '%i %i' % (v1, v2)
+
+        if len(self.edge_color) > 0:
+            if len(self.edge_color[number]) == 3:
+                string += ' %i %i %i' % (self.edge_color[number][0], self.edge_color[number][1], self.edge_color[number][2])
+            elif len(self.edge_color[number]) == 4:
+                string += ' %f %f %f %f' % (self.edge_color[number][0], self.edge_color[number][1], self.edge_color[number][2], self.edge_color[number][3])
+        
+        return string
+
+    def edgeBuffer( self ):
+        buffer = []
+        for number in range( self.totalEdges() ):
+            v1 = self.edge_indices[number*2]
+            v2 = self.edge_indices[number*2+1]
+        return np.array(buffer, dtype=np.int32)
+
+    # TRIANGLES / FACES
+
     def addIndex( self, index ):
-        self.indices.append( index );
+        self.indices.append( index )
+
+    def totalIndices( self ):
+        return len(self.indices)
+
+    def indexBuffer( self ):
+        return np.array(self.indices, dtype=np.int32)
 
     def addTriangle( self, i1, i2, i3 ):
         self.addIndex( i1 )
@@ -90,24 +186,10 @@ class Mesh(object):
         v1 = self.indices[index*3+0]
         v2 = self.indices[index*3+1]
         v3 = self.indices[index*3+2]
-
         return ' %i %i %i' % (v1, v2, v3)
 
-    def addNormalIndex( self, index ):
-        self.indices_normals.append( index );
-
-    def addNormalTriangle( self, i1, i2, i3 ):
-        self.addNormalIndex( i1 )
-        self.addNormalIndex( i2 )
-        self.addNormalIndex( i3 )
-
-    def addTexCoordIndex( self, index ):
-        self.indices_texcoords.append( index );
-
-    def addTexCoordTriangle( self, i1, i2, i3 ):
-        self.addTexCoordIndex( i1 )
-        self.addTexCoordIndex( i2 )
-        self.addTexCoordIndex( i3 )
+    def totalFaces( self ):
+        return int(len(self.indices)/3)
 
     def faceString( self, number ):
         v1 = vt1 = vn1 = self.indices[number*3] + 1
@@ -134,36 +216,30 @@ class Mesh(object):
         else:
             return ' %i %i %i' % (v1, v2, v3)
 
-    def totalFaces( self ):
-        return int(len(self.indices)/3)
+    def faceOffsetBuffer( self ):
+        buffer = []
+        if self.totalFaces() > 0:
+            head = 0
+            for index in range( self.totalFaces() ):
+                buffer.append(head)
+                head += 3
+        return np.array(buffer, dtype=np.int32)
 
-    def addEdge( self, i1, i2, color = None ):
-        self.edge_indices.append( i1 );
-        self.edge_indices.append( i2 );
-        if color:
-            self.edge_color.append( color )
+    def faceLengthBuffer( self ):
+        buffer = []
+        if self.totalFaces() > 0:
+            for index in range( self.totalFaces() ):
+                buffer.append(3)
+        return np.array(buffer, dtype=np.int32)
 
-    def edgeString( self, number ):
-        v1 = self.edge_indices[number*2]
-        v2 = self.edge_indices[number*2+1]
-
-        string = '%i %i' % (v1, v2)
-
-        if len(self.edge_color) > 0:
-            if len(self.edge_color[number]) == 3:
-                string += ' %i %i %i' % (self.edge_color[number][0], self.edge_color[number][1], self.edge_color[number][2])
-            elif len(self.edge_color[number]) == 4:
-                string += ' %f %f %f %f' % (self.edge_color[number][0], self.edge_color[number][1], self.edge_color[number][2], self.edge_color[number][3])
-        
-        return string
-
-    def totalEdges( self ):
-        return int(len(self.edge_indices)/2)
+    #  MATERIAL
 
     def addMaterial( self, mat, index = None ):
         if index == None:
             index = len(self.vertices)
         self.materials.append( [index, mat] )
+
+    # OPERATIONS
 
     def clear( self ):
         self.vertices = []
@@ -282,6 +358,8 @@ class Mesh(object):
         self.translateX(-bbox[3] + dx*.5)
         self.translateY(-bbox[4] + dy*.5)
         self.translateZ(-bbox[5] + dy*.5)
+
+    # EXPORT/IMPORT
 
     def toObj( self, file_name = None ):
         lines = '# OBJ by Patricio Gonzalez Vivo\n'

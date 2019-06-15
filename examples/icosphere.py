@@ -20,8 +20,7 @@ if len(sys.argv) > 2:
     if int(sys.argv[2]):
         precision = int(sys.argv[2])
 
-
 mesh = Mesh("IcoSphere")
-mesh = icosphere(mesh, size, precision);
+mesh = icosphere(mesh, size, precision, color=[1.0,0.0,0.0]);
 
 mesh.toPly('icosphere_' + str(len(mesh.vertices))+ 'v.ply')
