@@ -57,12 +57,6 @@ class Mesh(object):
     def vertexString( self, index ):
         return '%f %f %f' % (self.vertices[index][0], self.vertices[index][1], self.vertices[index][2])
 
-    def vertexBuffer( self ):
-        buffer = []
-        for vertex in self.vertices:
-            buffer.extend( vertex )
-        return np.array(buffer, dtype=np.float32)
-
     # TEXCOORDS
 
     def addTexCoord( self, vt ):
@@ -78,12 +72,6 @@ class Mesh(object):
 
     def texCoordString( self, index ):
         return ' %f %f' % (self.vertices_texcoords[index][0], self.vertices_texcoords[index][1])
-
-    def texCoordBuffer( self):
-        buffer = []
-        for vertex in self.vertices_texcoords:
-            buffer.extend( vertex )
-        return np.array(buffer, dtype=np.float32)
 
     # NORMALS
 
@@ -101,12 +89,6 @@ class Mesh(object):
     def normalString( self, index):
         n = self.vertices_normals[index]
         return ' %f %f %f' % (n[0], n[1], n[2])
-
-    def normalBuffer( self):
-        buffer = []
-        for vertex in self.vertices_normals:
-            buffer.extend( vertex )
-        return np.array(buffer, dtype=np.float32)
 
     # COLORS
 
@@ -127,12 +109,6 @@ class Mesh(object):
                 return ' %f %f %f %f' % (self.vertices_colors[index][0], self.vertices_colors[index][1], self.vertices_colors[index][2], self.vertices_colors[index][3])
             else:
                 return ' %f %f %f' % (self.vertices_colors[index][0], self.vertices_colors[index][1], self.vertices_colors[index][2])
-    
-    def colorBuffer( self ):
-        buffer = []
-        for vertex in self.vertices_colors:
-            buffer.extend( vertex )
-        return np.array(buffer, dtype=np.float32)
 
     # EDGES
 
@@ -159,13 +135,6 @@ class Mesh(object):
         
         return string
 
-    def edgeBuffer( self ):
-        buffer = []
-        for number in range( self.totalEdges() ):
-            v1 = self.edge_indices[number*2]
-            v2 = self.edge_indices[number*2+1]
-        return np.array(buffer, dtype=np.int32)
-
     # TRIANGLES / FACES
 
     def addIndex( self, index ):
@@ -173,9 +142,6 @@ class Mesh(object):
 
     def totalIndices( self ):
         return len(self.indices)
-
-    def indexBuffer( self ):
-        return np.array(self.indices, dtype=np.int32)
 
     def addTriangle( self, i1, i2, i3 ):
         self.addIndex( i1 )
@@ -215,22 +181,6 @@ class Mesh(object):
             return ' %i//%i %i//%i %i//%i' % (v1, vn1, v2, vn2, v3, vn3)
         else:
             return ' %i %i %i' % (v1, v2, v3)
-
-    def faceOffsetBuffer( self ):
-        buffer = []
-        if self.totalFaces() > 0:
-            head = 0
-            for index in range( self.totalFaces() ):
-                buffer.append(head)
-                head += 3
-        return np.array(buffer, dtype=np.int32)
-
-    def faceLengthBuffer( self ):
-        buffer = []
-        if self.totalFaces() > 0:
-            for index in range( self.totalFaces() ):
-                buffer.append(3)
-        return np.array(buffer, dtype=np.int32)
 
     #  MATERIAL
 
@@ -751,26 +701,20 @@ property float z
                 currentFace += 1
 
     def toBlenderMesh( self, blender_mesh ):
+        edges = []
+        for edge in range( self.totalEdges() ):
+            v1 = self.edge_indices[edge*2]
+            v2 = self.edge_indices[edge*2+1]
+            edges.append( (v1, v2) ) 
 
-        # Vertices and edges (straightforward)
-        blender_mesh.vertices.add( self.totalVertices() )
-        blender_mesh.vertices.foreach_set("co", self.vertexBuffer() )
+        faces = []
+        for face in range( self.totalFaces() ):
+            v1 = self.indices[face*3]
+            v2 = self.indices[face*3+1]
+            v3 = self.indices[face*3+2]
+            faces.append( (v1, v2, v3) )
 
-        # Setting edges is optional, as they get created automatically for
-        # any provided polygons. However, if you need edges that exist separately
-        # from polygons then use this array.
-        # XXX these edges only seem to show up after going in-and-out of edit mode.
-        blender_mesh.edges.add( self.totalEdges() )
-        blender_mesh.edges.foreach_set("vertices", self.edgeBuffer() )
-
-        # Polygons are defined in loops. Here, we define one quad and two triangles
-        blender_mesh.loops.add( self.totalIndices() )
-        blender_mesh.loops.foreach_set("vertex_index", self.indexBuffer() )
-
-        # For each polygon the start of its vertex indices in the vertex_index array
-        blender_mesh.polygons.add( self.totalFaces() )
-        blender_mesh.polygons.foreach_set("loop_start", self.faceOffsetBuffer() )
-        blender_mesh.polygons.foreach_set("loop_total", self.faceLengthBuffer() ) # Length of each polygon in number of vertices
+        blender_mesh.from_pydata( self.vertices, edges, faces )
 
         # Texture coordinates per vertex *per polygon loop*.
         # Create UV coordinate layer and set values
@@ -779,7 +723,6 @@ property float z
             for i, uv in enumerate(uv_layer.data):
                 index = self.indices[i]
                 uv.uv = self.vertices_texcoords[index]
-
 
         # Vertex color per vertex *per polygon loop*    
         # Create vertex color layer and set values
