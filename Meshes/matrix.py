@@ -70,10 +70,19 @@ def mat4_translateZ(d):
         [0, 0, d, 1]
     ])
 
-def mat4_scale(sx, sy, sz):
+def mat4_scale(val):
+    s = [1.0, 1.0, 1.0]
+
+    if isinstance(val, tuple) or isinstance(val, list):
+        for i in range(min(len(val), 3)):
+            s[i] = val[i]
+    else:
+         for i in range(3):
+             s[i] = val
+             
     return np.array([
-        [sx, 0, 0, 0],
-        [0, sy, 0, 0],
-        [0, 0, sz, 0],
+        [s[0], 0, 0, 0],
+        [0, s[1], 0, 0],
+        [0, 0, s[2], 0],
         [0, 0, 0, 1]
     ])

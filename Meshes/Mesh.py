@@ -295,7 +295,7 @@ class Mesh(object):
         for i in range(len(self.vertices)):
             self.vertices[i] = mv_mult(mat, self.vertices[i])
 
-    def scale( self, sx, sy, sz ):
+    def scale( self, d ):
         mat = mat4_scale(d)
         for i in range(len(self.vertices)):
             self.vertices[i] = mv_mult(mat, self.vertices[i])
