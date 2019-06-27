@@ -9,7 +9,7 @@ import numpy as np
 from math import cos, sin, sqrt, atan2
 from triangle import triangulate
 
-from Meshes.quaternion import axisangle_to_q, qv_mult
+from Meshes.quaternion import quat_from_axis, quat_mult
 from Meshes.vector import perpendicular, normalize
 from Meshes.tessellate import tessPolygon
 from Meshes.path import circle2D
@@ -19,10 +19,12 @@ TAU = np.pi * 2
 QUAD_TEXTCOORDS = [[0,0],[0,1],[1,1],[1,0]]
 
 def toSphere (coord, sphere_radius):
-    lngQuat = axisangle_to_q((1, 0, 0), np.radians(coord[0]))
-    latQuat = axisangle_to_q((0, 1, 0), np.radians(coord[1]))
-    level = axisangle_to_q((0, 0, 1), np.radians(90))
-    return qv_mult(level, qv_mult(lngQuat, qv_mult(latQuat, (0, 0, sphere_radius))))
+    lngQuat = quat_from_axis(np.radians(coord[0]), (1, 0, 0))
+    latQuat = quat_from_axis(np.radians(coord[1]), (0, 1, 0))
+    level = quat_from_axis(np.radians(90), (0, 0, 1))
+    
+    return quat_mult(level, quat_mult(lngQuat, quat_mult(latQuat, (0, 0, sphere_radius))))
+
     
 def spherePoint( mesh, position, sphere_radius = 1, point_size = None, color = None):
     offset = len(mesh.vertices)
@@ -53,6 +55,7 @@ def spherePoint( mesh, position, sphere_radius = 1, point_size = None, color = N
 
     return mesh
 
+
 def sphereDot( mesh, position, sphere_radius = 1, dot_size = None, color = None):
     dot_radius = 0.0
     prev_mats = len(mesh.materials)
@@ -74,6 +77,7 @@ def sphereDot( mesh, position, sphere_radius = 1, dot_size = None, color = None)
     mesh.add(dot_mesh)
 
     return mesh
+
 
 def sphereSpline( mesh, positions, sphere_radius = 1, line_width = None, color = None):
     offset = len(mesh.vertices)
@@ -111,6 +115,7 @@ def sphereSpline( mesh, positions, sphere_radius = 1, line_width = None, color =
 
     return mesh
 
+
 def spherePolygon( mesh, positions, sphere_radius = 1, color = None):
     offset = len(mesh.vertices)
 
@@ -143,6 +148,7 @@ def spherePolygon( mesh, positions, sphere_radius = 1, color = None):
     offset += len(positions)
 
     return mesh
+
 
 def sphere(mesh, sphere_radius = 1, resolution = 12, color = None):
     offset = len(mesh.vertices)

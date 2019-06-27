@@ -9,7 +9,7 @@ from math import floor, ceil
 import numpy as np
 from triangle import triangulate
 
-from Meshes.quaternion import axisangle_to_q, qv_mult
+from Meshes.quaternion import quat_from_axis, quat_mult
 from Meshes.tools import boundingBox, remap
 
 def tessIsoRect( mesh, width, height, precision = 1.0, z = 0.0, color = None):
@@ -100,7 +100,7 @@ def tessPolygon( mesh, positions, z, color = None, flipped = False):
     rotY = []
     if flipped: 
         n = [0., 0., -1.]
-        rotY = axisangle_to_q((0, 1, 0), np.radians(180))
+        rotY = quat_from_axis(np.radians(180), (0, 1, 0))
 
     min_x, min_y, max_x, max_y = boundingBox(positions)
 
@@ -108,7 +108,7 @@ def tessPolygon( mesh, positions, z, color = None, flipped = False):
     for point in positions:
         v = np.array([point[0], point[1], z])
         if flipped:
-            v = qv_mult(rotY, (v[0], v[1], v[2]))
+            v = quat_mult(rotY, (v[0], v[1], v[2]))
 
         points.append( [point[0], point[1]] )
         mesh.addTexCoord([ remap(point[0], min_x, max_x, 0.0, 1.0), remap(point[1], min_y, max_y, 0.0, 1.0) ])

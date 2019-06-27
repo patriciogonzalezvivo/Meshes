@@ -7,13 +7,17 @@ from __future__ import unicode_literals
 
 import math
 
-# inspired from https://github.com/keijiro/Pcx/blob/master/Assets/Pcx/Shaders/Disk.cginc 
-def circle(mesh, pos=[0,0,0], num_vertices = 8, color = None):
+# inspired from https://github.com/keijiro/Pcx/blob/master/Assets/Pcx/Runtime/Shaders/Disk.cginc
+def circle(mesh, pos=[0,0,0], num_vertices = 8, size = None, color = None):
     offset = len(mesh.vertices)  
-    normal = [0., 0., 1.]  
+    normal = [0., 0., 1.]
 
     # Top vertex
-    mesh.addVertex( pos )
+    if size:
+        mesh.addVertex( [pos[0], pos[1] + size, 0.0] )
+    else: 
+        mesh.addVertex( pos )
+
     if color:
         mesh.addColor( color )
     mesh.addNormal( normal )
@@ -25,31 +29,53 @@ def circle(mesh, pos=[0,0,0], num_vertices = 8, color = None):
         cos = math.cos(i * math.pi / slices)
 
         # Right-side vertex
-        mesh.addVertex( pos )
+        if size:
+            mesh.addVertex( [pos[0] + size * sin, pos[1] + size * cos, 0.0] )
+        else:
+            mesh.addVertex( pos )
+
         if color:
             mesh.addColor( color )
         mesh.addNormal( normal ) 
         mesh.addTexCoord( [sin, cos] )
 
         # Left-side vertex
-        mesh.addVertex( pos )
+        if size:
+            mesh.addVertex( [pos[0] + size * -sin, pos[1] + size * cos, 0.0] )
+        else:
+            mesh.addVertex( pos )
+
         if color:
             mesh.addColor( color )
         mesh.addNormal( normal )
         mesh.addTexCoord( [-sin, cos] )
 
     # Bottom vertex
-    mesh.addVertex( pos )
+    if size:
+        mesh.addVertex( [pos[0], pos[1] - size, 0.0] )
+    else:
+        mesh.addVertex( pos )
+
     if color:
         mesh.addColor( color )
+
     mesh.addNormal( normal )
     mesh.addTexCoord( [0, -1] )
 
     # Indices
-    for i in range(2 * (slices - 1)):
-        mesh.addIndex(offset + i)
-        mesh.addIndex(offset + i + 1)
-        mesh.addIndex(offset + i + 2)
+    counter = 0
+    for i in range( 2 * (slices - 1) ):
+        if counter%2 == 1:
+            mesh.addIndex(offset + i + 0)
+            mesh.addIndex(offset + i + 1)
+            mesh.addIndex(offset + i + 2)
+        else:
+            mesh.addIndex(offset + i + 2)
+            mesh.addIndex(offset + i + 1)
+            mesh.addIndex(offset + i + 0)
+        counter += 1
+
+    return mesh
 
 
 def halfcircle(mesh, pos=[0,0,0], num_vertices = 8, color = None):
@@ -94,6 +120,8 @@ def halfcircle(mesh, pos=[0,0,0], num_vertices = 8, color = None):
         mesh.addIndex(offset + i)
         mesh.addIndex(offset + i + 1)
         mesh.addIndex(offset + i + 2)
+
+    return mesh
 
 
 def square(mesh, pos=[0,0,0], color = None):

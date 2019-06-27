@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 import sys
 from Meshes import Mesh, extrudeLine
 
-num_points = 3
+num_points = 10
 
 if len(sys.argv) > 1:
     if int(sys.argv[1]):

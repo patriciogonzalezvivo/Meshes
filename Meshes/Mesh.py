@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 import os
 import numpy as np
 from math import sqrt, cos, sin
-from Meshes.matrix import mv_mult, mat4_rotateX, mat4_rotateY, mat4_rotateZ, mat4_translateX, mat4_translateY, mat4_translateZ, mat4_scale
+from Meshes.matrix import *
 from Meshes.tools import boundingBox
 
 try:
@@ -258,56 +258,53 @@ class Mesh(object):
 
     def rotateX( self, deg ):
         mat = mat4_rotateX(deg)
-        for i in range(len(self.vertices)):
-            self.vertices[i] = mv_mult(mat, self.vertices[i])
-
-        for i in range(len(self.vertices_normals)):
-            self.vertices_normals[i] = mv_mult(mat, self.vertices_normals[i])
+        self.rotate_mat(mat)
 
     def rotateY( self, deg ):
         mat = mat4_rotateY(deg)
-        for i in range(len(self.vertices)):
-            self.vertices[i] = mv_mult(mat, self.vertices[i])
-
-        for i in range(len(self.vertices_normals)):
-            self.vertices_normals[i] = mv_mult(mat, self.vertices_normals[i])
+        self.rotate_mat(mat)
 
     def rotateZ( self, deg ):
         mat = mat4_rotateZ(deg)
-        for i in range(len(self.vertices)):
-            self.vertices[i] = mv_mult(mat, self.vertices[i])
-
-        for i in range(len(self.vertices_normals)):
-            self.vertices_normals[i] = mv_mult(mat, self.vertices_normals[i])
+        self.rotate_mat(mat)
 
     def translateX( self, d ):
         mat = mat4_translateX(d)
-        for i in range(len(self.vertices)):
-            self.vertices[i] = mv_mult(mat, self.vertices[i])
+        self.transform_mat(mat)
 
     def translateY( self, d ):
         mat = mat4_translateY(d)
-        for i in range(len(self.vertices)):
-            self.vertices[i] = mv_mult(mat, self.vertices[i])
+        self.transform_mat(mat)
 
     def translateZ( self, d ):
         mat = mat4_translateZ(d)
-        for i in range(len(self.vertices)):
-            self.vertices[i] = mv_mult(mat, self.vertices[i])
+        self.transform_mat(mat)
+
+    def translate_vec3( self, vec3 ):
+        mat = mat4_translate( vec3) 
+        self.transform_mat( mat )
 
     def scale( self, scale ):
         mat = mat4_scale(scale)
+        self.transform_mat(mat)
+
+    def transform_mat( self, mat ):
         for i in range(len(self.vertices)):
-            self.vertices[i] = mv_mult(mat, self.vertices[i])
+            self.vertices[i] = mat4_mult(mat, self.vertices[i])
+
+    def rotate_mat( self, mat ):
+        self.transform_mat(mat)
+        for i in range(len(self.vertices_normals)):
+            self.vertices_normals[i] = mat4_mult(mat, self.vertices_normals[i])
 
     def center( self ):
         bbox = boundingBox(self.vertices)
         dx = bbox[3] - bbox[0]
         dy = bbox[4] - bbox[1]
         dz = bbox[5] - bbox[2]
-        self.translateX(-bbox[3] + dx*.5)
-        self.translateY(-bbox[4] + dy*.5)
-        self.translateZ(-bbox[5] + dy*.5)
+        self.translateX(-bbox[3] + dx * 0.5 )
+        self.translateY(-bbox[4] + dy * 0.5 )
+        self.translateZ(-bbox[5] + dy * 0.5 )
 
     # EXPORT/IMPORT
 
