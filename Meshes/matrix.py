@@ -55,7 +55,7 @@ def mat4_translate( direction ):
     """
     M = np.identity(4)
     M[:3, 3] = direction[:3]
-    return M
+    return M.transpose() 
 
 # def mat4_scale(val):
 #     s = [1.0, 1.0, 1.0]
@@ -177,26 +177,40 @@ def mat4_rotate(angle, direction, point=None):
         # rotation not around origin
         point = np.array(point[:3], dtype=np.float64, copy=False)
         M[:3, 3] = point - np.dot(R, point)
-    return M
+    return M.transpose() 
+
+
+def mat4_from_A_to_B(A, B):
+    v = np.cross(A, B)
+    u = v/np.linalg.norm(v)
+    c = np.dot(A, B)
+    h = (1 - c)/(1 - c**2)
+
+    vx, vy, vz = v
+    return  np.array(   [[c + h*vx**2,   h*vx*vy - vz,   h*vx*vz + vy,   0.0],
+                        [h*vx*vy+vz,    c+h*vy**2,      h*vy*vz-vx,     0.0],
+                        [h*vx*vz - vy,  h*vy*vz + vx,   c+h*vz**2,      0.0],
+                        [0.0,           0.0,            0.0,            1.0] ] ).transpose()
+
 
 #  https://www.lfd.uci.edu/~gohlke/code/transformations.py.html
-def mat4_euler(ai, aj, ak, axes='sxyz'):
+def mat4_from_euler(ai, aj, ak, axes='sxyz'):
     """Return homogeneous rotation matrix from Euler angles and axis sequence.
 
     ai, aj, ak : Euler's roll, pitch and yaw angles
     axes : One of 24 axis sequences as string or encoded tuple
 
-    >>> R = mat4_euler(1, 2, 3, 'syxz')
+    >>> R = mat4_from_euler(1, 2, 3, 'syxz')
     >>> np.allclose(np.sum(R[0]), -1.34786452)
     True
-    >>> R = mat4_euler(1, 2, 3, (0, 1, 0, 1))
+    >>> R = mat4_from_euler(1, 2, 3, (0, 1, 0, 1))
     >>> np.allclose(np.sum(R[0]), -0.383436184)
     True
     >>> ai, aj, ak = (4*math.pi) * (np.random.random(3) - 0.5)
     >>> for axes in _AXES2TUPLE.keys():
-    ...    R = mat4_euler(ai, aj, ak, axes)
+    ...    R = mat4_from_euler(ai, aj, ak, axes)
     >>> for axes in _TUPLE2AXES.keys():
-    ...    R = mat4_euler(ai, aj, ak, axes)
+    ...    R = mat4_from_euler(ai, aj, ak, axes)
 
     """
     try:
@@ -240,20 +254,20 @@ def mat4_euler(ai, aj, ak, axes='sxyz'):
         M[k, i] = -sj
         M[k, j] = cj*si
         M[k, k] = cj*ci
-    return M
+    return M.transpose() 
 
 
 # https://www.lfd.uci.edu/~gohlke/code/transformations.py.html
-def mat4_quat(quaternion):
+def mat4_from_quat(quaternion):
     """Return homogeneous rotation matrix from quaternion.
 
-    >>> M = mat4_quat([0.99810947, 0.06146124, 0, 0])
+    >>> M = mat4_from_quat([0.99810947, 0.06146124, 0, 0])
     >>> np.allclose(M, rotation_matrix(0.123, [1, 0, 0]))
     True
-    >>> M = mat4_quat([1, 0, 0, 0])
+    >>> M = mat4_from_quat([1, 0, 0, 0])
     >>> np.allclose(M, np.identity(4))
     True
-    >>> M = mat4_quat([0, 1, 0, 0])
+    >>> M = mat4_from_quat([0, 1, 0, 0])
     >>> np.allclose(M, np.diag([1, -1, -1, 1]))
     True
 
@@ -268,7 +282,7 @@ def mat4_quat(quaternion):
         [1.0-q[2, 2]-q[3, 3],     q[1, 2]-q[3, 0],     q[1, 3]+q[2, 0], 0.0],
         [    q[1, 2]+q[3, 0], 1.0-q[1, 1]-q[3, 3],     q[2, 3]-q[1, 0], 0.0],
         [    q[1, 3]-q[2, 0],     q[2, 3]+q[1, 0], 1.0-q[1, 1]-q[2, 2], 0.0],
-        [                0.0,                 0.0,                 0.0, 1.0]])
+        [                0.0,                 0.0,                 0.0, 1.0]]).transpose() 
 
 
 # https://www.lfd.uci.edu/~gohlke/code/transformations.py.html
@@ -348,7 +362,7 @@ def mat4_projection(    point, normal, direction=None,
         # orthogonal projection
         M[:3, :3] -= np.outer(normal, normal)
         M[:3, 3] = np.dot(point, normal) * normal
-    return M
+    return M.transpose() 
 
 def mat4_clip(left, right, bottom, top, near, far, perspective=False):
     """Return matrix to obtain normalized device coordinates from frustum.
@@ -399,7 +413,7 @@ def mat4_clip(left, right, bottom, top, near, far, perspective=False):
              [0.0, 2.0/(top-bottom), 0.0, (top+bottom)/(bottom-top)],
              [0.0, 0.0, 2.0/(far-near), (far+near)/(near-far)],
              [0.0, 0.0, 0.0, 1.0]]
-    return np.array(M)
+    return np.array(M).transpose() 
 
 
 def mat4_orthogonal(lengths, angles):
@@ -426,7 +440,7 @@ def mat4_orthogonal(lengths, angles):
         [ a*sinb*sqrt(1.0-co*co),  0.0,    0.0, 0.0],
         [-a*sinb*co,                    b*sina, 0.0, 0.0],
         [ a*cosb,                       b*cosa, c,   0.0],
-        [ 0.0,                          0.0,    0.0, 1.0]])
+        [ 0.0,                          0.0,    0.0, 1.0]]).transpose() 
 
 
 def mat4_compose(scale=None, shear=None, angles=None, translate=None,
@@ -479,4 +493,4 @@ def mat4_compose(scale=None, shear=None, angles=None, translate=None,
         S[2, 2] = scale[2]
         M = np.dot(M, S)
     M /= M[3, 3]
-    return M
+    return M.transpose() 

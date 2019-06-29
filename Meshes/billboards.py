@@ -6,57 +6,63 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import math
+import numpy as np
 
 # inspired from https://github.com/keijiro/Pcx/blob/master/Assets/Pcx/Runtime/Shaders/Disk.cginc
-def circle(mesh, pos=[0,0,0], num_vertices = 8, size = None, color = None):
+def circle(mesh, position=[0,0,0], resolution=8, radius=None, color=None):
     offset = len(mesh.vertices)  
     normal = [0., 0., 1.]
+    
+    if isinstance( color, (np.ndarray, np.generic) ):
+        color = color.tolist()        
 
     # Top vertex
-    if size:
-        mesh.addVertex( [pos[0], pos[1] + size, 0.0] )
+    if radius:
+        mesh.addVertex( [position[0], position[1] + radius, 0.0] )
     else: 
-        mesh.addVertex( pos )
+        mesh.addVertex( position )
 
-    if color:
+    if color != None:
         mesh.addColor( color )
+        
     mesh.addNormal( normal )
     mesh.addTexCoord( [0, 1] )  
 
-    slices = int(math.floor(num_vertices / 2))
+    slices = int(math.floor(resolution / 2))
     for i in range(1, slices):
         sin = math.sin(i * math.pi / slices)
         cos = math.cos(i * math.pi / slices)
 
         # Right-side vertex
-        if size:
-            mesh.addVertex( [pos[0] + size * sin, pos[1] + size * cos, 0.0] )
+        if radius:
+            mesh.addVertex( [position[0] + radius * sin, position[1] + radius * cos, 0.0] )
         else:
-            mesh.addVertex( pos )
+            mesh.addVertex( position )
 
-        if color:
+        if color != None:
             mesh.addColor( color )
+
         mesh.addNormal( normal ) 
         mesh.addTexCoord( [sin, cos] )
 
         # Left-side vertex
-        if size:
-            mesh.addVertex( [pos[0] + size * -sin, pos[1] + size * cos, 0.0] )
+        if radius:
+            mesh.addVertex( [position[0] + radius * -sin, position[1] + radius * cos, 0.0] )
         else:
-            mesh.addVertex( pos )
+            mesh.addVertex( position )
 
-        if color:
+        if color != None:
             mesh.addColor( color )
         mesh.addNormal( normal )
         mesh.addTexCoord( [-sin, cos] )
 
     # Bottom vertex
-    if size:
-        mesh.addVertex( [pos[0], pos[1] - size, 0.0] )
+    if radius:
+        mesh.addVertex( [position[0], position[1] - radius, 0.0] )
     else:
-        mesh.addVertex( pos )
+        mesh.addVertex( position )
 
-    if color:
+    if color != None:
         mesh.addColor( color )
 
     mesh.addNormal( normal )
@@ -78,42 +84,50 @@ def circle(mesh, pos=[0,0,0], num_vertices = 8, size = None, color = None):
     return mesh
 
 
-def halfcircle(mesh, pos=[0,0,0], num_vertices = 8, color = None):
+def halfcircle(mesh, position=[0,0,0], resolution=8, radius=None, color=None):
     offset = len(mesh.vertices)  
     normal = [0., 0., 1.]  
 
     # Top vertex
-    mesh.addVertex( pos )
+    if radius:
+        mesh.addVertex( [position[0], position[1] + radius, 0.0] )
+    else: 
+        mesh.addVertex( position )
+
     if color:
         mesh.addColor( color )
+
     mesh.addNormal( normal )
     mesh.addTexCoord( [0, 1] )  
 
-    slices = int(math.floor(num_vertices / 2))
+    slices = int(math.floor(resolution / 2))
     for i in range(1, slices):
         sin = math.sin(i * math.pi * 0.5 / slices)
         cos = math.cos(i * math.pi * 0.5 / slices)
 
         # Right-side vertex
-        mesh.addVertex( pos )
+        if radius:
+            mesh.addVertex( [position[0] + radius * sin, position[1] + radius * cos, 0.0] )
+        else: 
+            mesh.addVertex( position )
+
         if color:
             mesh.addColor( color )
+
         mesh.addNormal( normal ) 
         mesh.addTexCoord( [sin, cos] )
 
         # Left-side vertex
-        mesh.addVertex( pos )
+        if radius:
+            mesh.addVertex( [position[0] + radius * -sin, position[1] + radius * cos, 0.0] )
+        else:
+            mesh.addVertex( position )
+
         if color:
             mesh.addColor( color )
+
         mesh.addNormal( normal )
         mesh.addTexCoord( [-sin, cos] )
-
-    # # Bottom vertex
-    # mesh.addVertex( pos )
-    # if color:
-    #     mesh.addColor( color )
-    # mesh.addNormal( normal )
-    # mesh.addTexCoord( [0, -1] )
 
     # Indices
     for i in range(2 * (slices - 1) - 1):
@@ -124,7 +138,7 @@ def halfcircle(mesh, pos=[0,0,0], num_vertices = 8, color = None):
     return mesh
 
 
-def square(mesh, pos=[0,0,0], color = None):
+def square(mesh, position=[0,0,0], color=None):
     offset = len(mesh.vertices)
     normal = [0., 0., 1.]
 
@@ -132,7 +146,7 @@ def square(mesh, pos=[0,0,0], color = None):
     h = math.ceil(2.0)
     for y in range(0, int(h)):
         for x in range(0, int(w)):
-            mesh.addVertex( pos )
+            mesh.addVertex( position )
             if color:
                 mesh.addColor( color )
             mesh.addNormal( normal )

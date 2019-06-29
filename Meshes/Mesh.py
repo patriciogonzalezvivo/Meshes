@@ -49,7 +49,7 @@ class Mesh(object):
     # VERTICES
 
     def addVertex( self, v ):
-        self.vertices.append( np.array(v) )
+        self.vertices.append( np.array(v.copy()) )
 
     def totalVertices( self ):
         return len(self.vertices)
@@ -60,7 +60,7 @@ class Mesh(object):
     # TEXCOORDS
 
     def addTexCoord( self, vt ):
-        self.vertices_texcoords.append( np.array(vt) )
+        self.vertices_texcoords.append( np.array(vt.copy()) )
 
     def addTexCoordIndex( self, index ):
         self.indices_texcoords.append( index );
@@ -76,7 +76,7 @@ class Mesh(object):
     # NORMALS
 
     def addNormal( self, vn ):
-        self.vertices_normals.append( np.array(vn) )
+        self.vertices_normals.append( np.array(vn.copy()) )
 
     def addNormalIndex( self, index ):
         self.indices_normals.append( index )
@@ -99,7 +99,7 @@ class Mesh(object):
             color = tuple(int(vc[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
             self.vertices_colors.append( [color[0], color[1], color[2]] )
         else:
-            self.vertices_colors.append( vc )
+            self.vertices_colors.append( vc.copy() )
 
     def colorString( self, index, alpha = True ):
         if len(self.vertices_colors[index]) == 3:
@@ -256,46 +256,94 @@ class Mesh(object):
             if indexCurr < len(colors):
                 self.addColor(colors[indexCurr])
 
-    def rotateX( self, deg ):
-        mat = mat4_rotateX(deg)
-        self.rotate_mat(mat)
-
-    def rotateY( self, deg ):
-        mat = mat4_rotateY(deg)
-        self.rotate_mat(mat)
-
-    def rotateZ( self, deg ):
-        mat = mat4_rotateZ(deg)
-        self.rotate_mat(mat)
-
-    def translateX( self, d ):
-        mat = mat4_translateX(d)
-        self.transform_mat(mat)
-
-    def translateY( self, d ):
-        mat = mat4_translateY(d)
-        self.transform_mat(mat)
-
-    def translateZ( self, d ):
-        mat = mat4_translateZ(d)
-        self.transform_mat(mat)
-
-    def translate_vec3( self, vec3 ):
-        mat = mat4_translate( vec3) 
-        self.transform_mat( mat )
 
     def scale( self, scale ):
         mat = mat4_scale(scale)
-        self.transform_mat(mat)
+        self.transform(mat)
 
-    def transform_mat( self, mat ):
+
+    def translateX( self, d ):
+        mat = mat4_translateX(d)
+        self.transform(mat)
+
+
+    def translateY( self, d ):
+        mat = mat4_translateY(d)
+        self.transform(mat)
+
+
+    def translateZ( self, d ):
+        mat = mat4_translateZ(d)
+        self.transform(mat)
+        
+
+    def translate( self, dir ):
+        mat = np.identity(4)
+
+        if isinstance( dir, (np.ndarray, np.generic) ):
+            if dir.shape[0] == 3:
+                mat = mat4_translate( dir ) 
+            elif len(dir.shape) == 2 and dir.shape[1] == 4:
+                mat = dir
+        elif isinstance( dir, (list, tuple) ):
+            mat = mat4_translate( dir ) 
+
+        self.transform( mat )
+
+
+    def rotateX( self, deg ):
+        mat = mat4_rotateX(deg)
+        self.rotate_mat4(mat)
+
+
+    def rotateY( self, deg ):
+        mat = mat4_rotateY(deg)
+        self.rotate_mat4(mat)
+
+
+    def rotateZ( self, deg ):
+        mat = mat4_rotateZ(deg)
+        self.rotate_mat4(mat)
+
+
+    def rotate_quat(self, quaternion):
+        mat = mat4_from_quat( quaternion)
+        self.rotate_mat4(mat)
+
+
+    def rotate_axis( self, angle, direction, point=None):
+        mat = mat4_rotate(angle, direction, point)
+        self.rotate_mat4(mat)
+
+
+    def rotate_axis_euler( self, ai, aj, ak, axes='sxyz'):
+        mat = mat4_from_euler(ai, aj, ak, axes)
+        self.rotate_mat4(mat)
+
+
+    def rotate_normal( self, normal, up=[0.0, 0.0, 1.0]):
+        self.rotate_from_A_to_B(vec3(up), vec3(normal))
+
+
+    def rotate_from_A_to_B( self, A_vec, B_vec):
+        mat = mat4_from_A_to_B(A_vec, B_vec)
+        self.rotate_mat4(mat)
+
+
+    def rotate_mat4( self, mat4 ):
+        self.transform( mat4 )
+        self.transform_normals( mat4 )
+
+    
+    def transform( self, mat ):
         for i in range(len(self.vertices)):
             self.vertices[i] = mat4_mult(mat, self.vertices[i])
 
-    def rotate_mat( self, mat ):
-        self.transform_mat(mat)
+
+    def transform_normals( self, mat ):
         for i in range(len(self.vertices_normals)):
             self.vertices_normals[i] = mat4_mult(mat, self.vertices_normals[i])
+
 
     def center( self ):
         bbox = boundingBox(self.vertices)
