@@ -49,7 +49,10 @@ class Mesh(object):
     # VERTICES
 
     def addVertex( self, v ):
-        self.vertices.append( np.array(v.copy()) )
+        if isinstance(v, np.ndarray):
+            self.vertices.append( v.copy() )
+        else:
+            self.vertices.append( np.array(v) )
 
     def totalVertices( self ):
         return len(self.vertices)
@@ -786,5 +789,4 @@ property float z
         blender_mesh.validate()
 
         return blender_mesh
-
 
