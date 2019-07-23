@@ -88,7 +88,7 @@ def tessRect( mesh, width, height, precision = 1.0, z = 0.0, color = None):
                 mesh.addIndex(offset + x + y * w)               # a
     return mesh
 
-def tessPolygon( mesh, positions, z, color = None, flipped = False):
+def tessPolygon( mesh, positions, z, color = None, flipped = False,  texture_boundingBox = None ):
     offset = len(mesh.vertices)
 
     n = [0., 0., 1.]
@@ -102,31 +102,36 @@ def tessPolygon( mesh, positions, z, color = None, flipped = False):
         n = [0., 0., -1.]
         rotY = quat_from_axis(np.radians(180), (0, 1, 0))
 
-    min_x, min_y, max_x, max_y = boundingBox(positions)
+    if texture_boundingBox == None:
+        texture_boundingBox = boundingBox(positions)
 
     points = []
     for point in positions:
-        v = np.array([point[0], point[1], z])
+        v = np.array([point[0], -point[1], z])
         if flipped:
-            v = quat_mult(rotY, (v[0], v[1], v[2]))
+            v = quat_mult(rotY, (v[0], v[1], v[2]) )
 
         points.append( [point[0], point[1]] )
-        mesh.addTexCoord([ remap(point[0], min_x, max_x, 0.0, 1.0), remap(point[1], min_y, max_y, 0.0, 1.0) ])
-        mesh.addVertex( v )
+        
+        mesh.addTexCoord( [ remap(point[0], texture_boundingBox[0], texture_boundingBox[2], 0.0, 1.0), 
+                            remap(point[1], texture_boundingBox[1], texture_boundingBox[3], 0.0, 1.0)] )
 
+        mesh.addVertex( v )
         mesh.addNormal( n )
         if color:
             mesh.addColor( color )
 
     segments = []
     for i in range( len(positions) ):
-        segments.append([i, (i + 1) % len(positions) ] )
+        segments.append( [i, (i + 1) % len(positions) ] )
 
     cndt = triangulate(dict(vertices=points, segments=segments),'p')
+
     for face in cndt['triangles']:
         mesh.addTriangle(   offset + ( face[0] % len(points) ), 
                             offset + ( face[1] % len(points) ), 
-                            offset + ( face[2] % len(points) ) )
-    offset += len(positions)
+                            offset + ( face[2] % len(points) )  )
+    
+    # offset += len(positions)
 
     return mesh

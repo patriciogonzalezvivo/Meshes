@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 import numpy as np
 from math import sqrt
 
-from Meshes.vector import perpendicular, normalize, dot
+from .vector import perpendicular, normalize, dot
 
 def extrudeLine( mesh, positions, z = 0.0, line_width = 0.0, color = None, flipped = False):
     offset = len( mesh.vertices )
@@ -142,3 +142,25 @@ def extrudeLine( mesh, positions, z = 0.0, line_width = 0.0, color = None, flipp
         mesh.addIndex(offset + 2 * i + 3)
 
     return mesh
+
+def extrudePoly( mesh, positions, depth, z=0.0, color = None):
+    offset = len( mesh.vertices )
+
+    index = 0
+    for p in positions:
+        mesh.addVertex( [p[0], p[1], 0] )
+        mesh.addVertex( [p[0], p[1], depth] )
+        index += 2
+
+    if index > 3:
+        for i in range(index - 1 ):
+            mesh.addIndex(offset + 2 * i + 3)
+            mesh.addIndex(offset + 2 * i + 2)
+            mesh.addIndex(offset + 2 * i )
+            
+            mesh.addIndex(offset + 2 * i )
+            mesh.addIndex(offset + 2 * i + 1)
+            mesh.addIndex(offset + 2 * i + 3)
+
+    return mesh
+

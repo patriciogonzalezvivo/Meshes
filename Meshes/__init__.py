@@ -14,7 +14,7 @@ from .path import rect2D, rectRound2D, circle2D
 
 # Functions
 from .tessellate import tessRect, tessIsoRect, tessPolygon
-from .extrude import extrudeLine
+from .extrude import extrudeLine, extrudePoly
 
 from .vector import *
 from .matrix import *

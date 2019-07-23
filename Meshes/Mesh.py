@@ -63,7 +63,10 @@ class Mesh(object):
     # TEXCOORDS
 
     def addTexCoord( self, vt ):
-        self.vertices_texcoords.append( np.array(vt.copy()) )
+        if isinstance(vt, np.ndarray):
+            self.vertices_texcoords.append( vt.copy() )
+        else:
+            self.vertices_texcoords.append( np.array(vt) )
 
     def addTexCoordIndex( self, index ):
         self.indices_texcoords.append( index );
@@ -79,7 +82,10 @@ class Mesh(object):
     # NORMALS
 
     def addNormal( self, vn ):
-        self.vertices_normals.append( np.array(vn.copy()) )
+        if isinstance(vn, np.ndarray):
+            self.vertices_normals.append( vn.copy() )
+        else:
+            self.vertices_normals.append( np.array(vn) )
 
     def addNormalIndex( self, index ):
         self.indices_normals.append( index )
