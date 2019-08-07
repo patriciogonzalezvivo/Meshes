@@ -107,7 +107,7 @@ class Mesh(object):
             lv = len(vc)
             color = tuple(int(vc[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
             self.vertices_colors.append( [color[0], color[1], color[2]] )
-        elif isinstance(vt, np.ndarray):
+        elif isinstance(vc, np.ndarray):
             self.vertices_colors.append( vc.copy() )
         else:
             self.vertices_colors.append( np.array(vc) )
