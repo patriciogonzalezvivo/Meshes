@@ -9,9 +9,11 @@ import math
 import numpy as np
 
 # inspired from https://github.com/keijiro/Pcx/blob/master/Assets/Pcx/Runtime/Shaders/Disk.cginc
-def circle(mesh, position=[0,0,0], resolution=8, radius=None, color=None):
+def circle(mesh, position=[0,0,0], resolution=8, radius=None, color=None, normal=None):
     offset = len(mesh.vertices)  
-    normal = [0., 0., 1.]
+
+    if normal == None:
+        normal = [0., 0., 1.]
     
     if isinstance( color, (np.ndarray, np.generic) ):
         color = color.tolist()        

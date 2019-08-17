@@ -8,8 +8,7 @@ from __future__ import unicode_literals
 import numpy as np
 
 from math import cos, sin, acos, pi, sqrt
-from Meshes.vector import vec3 # ,normalize
-
+from Meshes.vector import vec3 ,normalize
 
 def quat_from_euler(ai, aj, ak, axes='sxyz'):
     """Return quaternion from Euler angles and axis sequence.
@@ -67,21 +66,30 @@ def quat_from_euler(ai, aj, ak, axes='sxyz'):
 
     return q
 
+def quat_from_axis(theta, axis):
+    axis = normalize(axis)
+    x, y, z = axis
+    theta /= 2
+    w = cos(theta)
+    x = x * sin(theta)
+    y = y * sin(theta)
+    z = z * sin(theta)
+    return w, x, y, z
 
-def quat_from_axis(angle, axis):
-    """Return quaternion for rotation about axis.
+# def quat_from_axis(angle, axis):
+#     """Return quaternion for rotation about axis.
 
-    >>> q = quat_from_axis(0.123, [1, 0, 0])
-    >>> np.allclose(q, [0.99810947, 0.06146124, 0, 0])
-    True
+#     >>> q = quat_from_axis(0.123, [1, 0, 0])
+#     >>> np.allclose(q, [0.99810947, 0.06146124, 0, 0])
+#     True
 
-    """
-    q = np.array([0.0, axis[0], axis[1], axis[2]])
-    qlen = vec3(q)
-    if qlen > _EPS:
-        q *= sin(angle/2.0) / qlen
-    q[0] = cos(angle/2.0)
-    return q
+#     """
+#     q = np.array([0.0, axis[0], axis[1], axis[2]])
+#     qlen = vec3(q)
+#     if qlen > _EPS:
+#         q *= sin(angle/2.0) / qlen
+#     q[0] = cos(angle/2.0)
+#     return q
 
 
 # def axisangle_to_quat(v, theta):
@@ -179,34 +187,41 @@ def quat_from_matrix(matrix, isprecise=False):
         numpy.negative(q, q)
     return q
 
-# def quat_mult(q1, q2):
-#     w1, x1, y1, z1 = q1
-#     w2, x2, y2, z2 = q2
-#     w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2
-#     x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2
-#     y = w1 * y2 + y1 * w2 + z1 * x2 - x1 * z2
-#     z = w1 * z2 + z1 * w2 + x1 * y2 - y1 * x2
-#     return w, x, y, z
+def quat_mult(q1, q2):
+    w1, x1, y1, z1 = q1
+    w2, x2, y2, z2 = q2
+    w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2
+    x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2
+    y = w1 * y2 + y1 * w2 + z1 * x2 - x1 * z2
+    z = w1 * z2 + z1 * w2 + x1 * y2 - y1 * x2
+    return w, x, y, z
 
-# def quat_mult(q1, v1):
-#     q2 = (0.0,) + v1
-#     return quat_mult(quat_mult(q1, q2), quat_conjugate(q1))[1:]
+def quat_mult(q1, value):
+    if len(value) == 4:
+        # """Return multiplication of two quaternions.
 
-def quat_mult(quaternion1, quaternion0):
-    """Return multiplication of two quaternions.
+        # >>> q = quat_mult([4, 1, -2, 3], [8, -5, 6, 7])
+        # >>> np.allclose(q, [28, -44, -14, 48])
+        # True
 
-    >>> q = quat_mult([4, 1, -2, 3], [8, -5, 6, 7])
-    >>> np.allclose(q, [28, -44, -14, 48])
-    True
+        # """
+        # w0, x0, y0, z0 = value
+        # w1, x1, y1, z1 = q1
+        # return np.array([ -x1*x0 - y1*y0 - z1*z0 + w1*w0,
+        #                     x1*w0 + y1*z0 - z1*y0 + w1*x0,
+        #                     -x1*z0 + y1*w0 + z1*x0 + w1*y0,
+        #                     x1*y0 - y1*x0 + z1*w0 + w1*z0 ], dtype=np.float64)
 
-    """
-    w0, x0, y0, z0 = quaternion0
-    w1, x1, y1, z1 = quaternion1
-    return np.array([    -x1*x0 - y1*y0 - z1*z0 + w1*w0,
-                            x1*w0 + y1*z0 - z1*y0 + w1*x0,
-                            -x1*z0 + y1*w0 + z1*x0 + w1*y0,
-                            x1*y0 - y1*x0 + z1*w0 + w1*z0], dtype=np.float64)
-
+        w1, x1, y1, z1 = q1
+        w2, x2, y2, z2 = value
+        w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2
+        x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2
+        y = w1 * y2 + y1 * w2 + z1 * x2 - x1 * z2
+        z = w1 * z2 + z1 * w2 + x1 * y2 - y1 * x2
+        return w, x, y, z
+    else:
+        q2 = (0.0,) + value
+        return quat_mult(quat_mult(q1, q2), quat_conjugate(q1))[1:]
 
 # def quat_conjugate(q):
 #     w, x, y, z = q

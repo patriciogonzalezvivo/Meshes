@@ -23,7 +23,7 @@ def toSphere (coord, radius):
     latQuat = quat_from_axis(np.radians(coord[1]), (0, 1, 0))
     level = quat_from_axis(np.radians(90), (0, 0, 1))
     
-    return quat_mult(level, quat_mult(lngQuat, quat_mult(latQuat, (0, 0, radius))))
+    return quat_mult(level, quat_mult(lngQuat, quat_mult(latQuat, (0, 0, radius ))))
 
     
 def spherePoint( mesh, position, radius = 1, point_size = None, color = None):
