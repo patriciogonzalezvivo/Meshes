@@ -107,7 +107,7 @@ def tessPolygon( mesh, positions, z, color = None, flipped = False,  texture_bou
 
     points = []
     for point in positions:
-        v = np.array([point[0], -point[1], z])
+        v = np.array([point[0], point[1], z])
         if flipped:
             v = quat_mult(rotY, (v[0], v[1], v[2]) )
 
